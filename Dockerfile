@@ -1,8 +1,8 @@
 # Use an official Python runtime as a parent image
-#FROM python:3.8-slim-buster
+FROM python:3.8-slim-buster
 
 #For M1 Mac
-FROM arm32v7/python:3.8-slim-buster
+#FROM arm32v7/python:3.8-slim-buster
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
