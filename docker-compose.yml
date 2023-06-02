@@ -1,0 +1,9 @@
+version: '3'
+services:
+  algs2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: algs2:latest
+    ports:
+      - 8001:8000
