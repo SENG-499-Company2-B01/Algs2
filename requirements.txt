@@ -1,2 +1,5 @@
 Django==3.2.6
 uwsgi==2.0.19.1
+openpyxl
+pandas
+numpy
