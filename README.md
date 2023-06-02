@@ -20,5 +20,5 @@ This repository contains a simple Django webserver that runs inside a Docker con
 
 The application can be accessed at 
 	
-	http://localhost:8000/predict
+	http://localhost:8001/predict
 
