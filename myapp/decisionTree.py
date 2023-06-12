@@ -15,9 +15,16 @@ def get_data(file_path):
     df['Year'] = df['Start Date'].str.split('-').str[0].astype(int)
     df['Term'] = df['Term'].astype(str).str.split('.').str[0].str[-2:]
     df['Course'] = df['Subj']+df["Num"]
+    # Add all courses to terms which do not have them for each year and set their enrolled to 0 and instructor to None
+    for year in df['Year'].unique():
+        for term in df['Term'].unique():
+            for course in df['Course'].unique():
+                if len(df[(df['Year'] == year) & (df['Term'] == term) & (df['Course'] == course)]) == 0:
+                    df = df.append({'Year': year, 'Term': term, 'Course': course, 'Enrolled': 0, 'Instructor': None}, ignore_index=True)
+    df['Prev Enrolled'] = df.groupby(['Course', 'Term'])['Enrolled'].shift(1)
 
     # Remove rows with less than 10 enrolled
-    df = df[df['Enrolled'] >= 10]
+    # df = df[df['Enrolled'] >= 10]
 
     return df
 
