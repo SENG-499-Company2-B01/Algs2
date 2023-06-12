@@ -43,11 +43,15 @@ def predict_detailed(request):
     elif ALG == "Decision tree":
         # e.g. results = predict_detailed_dectree()
         pass
-    # TODO: Return detailed predictions to backend via ??
+    # TODO: Return detailed predictions to backend
 
 def train(request):
     #TODO: Add train logic
-    # Get course info and training data from request and backend
+    # Get historic course info and training data from request and backend
+    # TBD since we don't know exact API format yet
+    # e.g. course_capacities = request.POST.get('course_capacities')
+    # Retrieve any other data from POST request
+
     if ALG == "Weighted mean":
         # e.g. train_weighted_mean()
         pass
@@ -57,7 +61,7 @@ def train(request):
     elif ALG == "Decision tree":
         # e.g. train_dectree()
         pass
-    #TODO: Return notification of training completion?
+    #TODO: Return notification of training completion (success/failure)
 
 def train_detailed(request):
     #TODO: Add train_detailed logic
@@ -71,4 +75,4 @@ def train_detailed(request):
     elif ALG == "Decision tree":
         # e.g. train_detailed_dec_tree()
         pass
-    #TODO: Return train_detailed completion notification?
+    #TODO: Return train_detailed completion notification (success/failure)
