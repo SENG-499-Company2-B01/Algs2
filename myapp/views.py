@@ -3,76 +3,66 @@ from django.shortcuts import render
 from .modules.weighted_mean_alg import weighted_mean_by_term
 from .modules.read_from_xl import read_xl_from_local_dir
 from .linearRegression import perform_linear_regression
+import requests
 
-# Select prediction algorithm below
-
-#ALG = "Linear regression"
-#ALG = "Decision tree"
-ALG = "Weighted mean"
+BACKEND_URL = "http://localhost:8000" # this will change
 
 #TODO: Get data from backend, not local files
 #TODO: Add predict logic
 
-def predict(request):
-    html = "<html><body><h1>" + ALG + " Prediction Results:</h1><ul>"
-    # Predict 
-    if ALG == "Weighted mean":
-        data = read_xl_from_local_dir()
-        courses = weighted_mean_by_term(data, 0.5, 0.25, 0.25)
-        for course in courses:
-            html = html + "<li>%s:\t%d</li>" % (course.full_name, course.predicted_size)
-    elif ALG == "Linear regression":
-        file_path = '/usr/src/app/myapp/data/Course_Summary_2022_2023.json'
-        score = perform_linear_regression(file_path)
-        print("R-squared score: {:.2f}".format(score))
-    elif ALG == "Decision tree":
-        # TODO: Add in decision tree prediction
-        pass
-    html = html + "</body></html>"
-    return HttpResponse(html)
+# def predict(request):
+#     html = "<html><body><h1>Prediction Results:</h1><ul>"
+#     # Predict 
+#     if ALG == "Weighted mean":
+#         data = read_xl_from_local_dir()
+#         courses = weighted_mean_by_term(data, 0.5, 0.25, 0.25)
+#         for course in courses:
+#             html = html + "<li>%s:\t%d</li>" % (course.full_name, course.predicted_size)
+#     elif ALG == "Linear regression":
+#         file_path = '/usr/src/app/myapp/data/Course_Summary_2022_2023.json'
+#         score = perform_linear_regression(file_path)
+#         print("R-squared score: {:.2f}".format(score))
+#     elif ALG == "Decision tree":
+#         # TODO: Add in decision tree prediction
+#         pass
+#     html = html + "</body></html>"
+#     return HttpResponse(html)
 
-def predict_detailed(request):
-    #TODO: Add predict_detailed logic
-    # Get course info from request & backend (how?)
-    if ALG == "Weighted mean":
-        # e.g. results = predict_detailed_mean()
-        pass
-    elif ALG == "Linear regression":
-        # e.g. results = predict_detailed_linreg()
-        pass
-    elif ALG == "Decision tree":
-        # e.g. results = predict_detailed_dectree()
-        pass
-    # TODO: Return detailed predictions to backend
+def request_schedule(schedule_id):
+    schedule = requests.get(BACKEND_URL + '/getSchedule', {'scheduleId': schedule_id})
+    return schedule
 
-def train(request):
+def extract_fields_from_schedule(schedule, fields):
+    course_list = schedule['schedule']
+    return [{key: course[key] for key in fields} for course in course_list]
+
+def generate(request):
+    # Get course info from request & backend
+    schedule = request_schedule(request.POST.get('schedule_id'))
+    # If no schedule is returned, perform simple prediction
+    if not schedule:
+        # e.g. results = predict_linreg(courses)
+        pass
+    # If schedule object is returned, perform detailed prediction using dec. tree
+    else:
+        #TODO: Extract relevant fields from schedule object for decision tree prediction
+        course_data = extract_fields_from_schedule(schedule, ["course", "professor", "days"])
+        # e.g. results = predict_dectree(courses, profs, ...)
+        pass
+    #TODO: Return predictions to backend (json)
+
+def notify(request):
     #TODO: Add train logic
     # Get historic course info and training data from request and backend
     # TBD since we don't know exact API format yet
     # e.g. course_capacities = request.POST.get('course_capacities')
     # Retrieve any other data from POST request
-
-    if ALG == "Weighted mean":
-        # e.g. train_weighted_mean()
+    schedule = request_schedule(request.POST.get('schedule_id'))
+    if not schedule:
+        # train_linreg()
         pass
-    elif ALG == "Linear regression":
-        # e.g. train_linreg()
-        pass
-    elif ALG == "Decision tree":
-        # e.g. train_dectree()
+    else:
+        train_data = extract_fields_from_schedule(schedule, ["course", "professor", "days"])
+        # train_dectree()
         pass
     #TODO: Return notification of training completion (success/failure)
-
-def train_detailed(request):
-    #TODO: Add train_detailed logic
-    # Get course info and training data from request and backend
-    if ALG == "Weighted mean":
-        # e.g. train_detailed_weighted_mean()
-        pass
-    elif ALG == "Linear regression":
-        # e.g. train_detailed_lin_reg()
-        pass
-    elif ALG == "Decision tree":
-        # e.g. train_detailed_dec_tree()
-        pass
-    #TODO: Return train_detailed completion notification (success/failure)
