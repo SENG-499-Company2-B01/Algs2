@@ -23,5 +23,5 @@ RUN apt-get update && apt-get install -y \
     && pip install --no-cache-dir -r requirements.txt
 
 # Run the command to start uWSGI
-CMD ["uwsgi", "--http", ":8000", "--wsgi-file", "myproject/wsgi.py", "--enable-threads"]
+CMD ["uwsgi", "--http", ":8000", "--wsgi-file", "prediction_service/wsgi.py", "--enable-threads"]
 
