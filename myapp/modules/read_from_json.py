@@ -62,7 +62,7 @@ def sum_course_enrollments(cleaned_data):
     return(aggregated_data)
 
 def main():
-    raw_data = read_json_from_local_dir()
+    raw_data = read_raw_json_from_local_dir()
     cleaned_data = clean_raw_data(raw_data)
     seng_data = filter_by_seng_program_courses(cleaned_data)
     seng_data_aggregated = sum_course_enrollments(seng_data)
@@ -71,7 +71,7 @@ def main():
     # Output cleaned data as json file in Client_Data dir
     current_path = os.path.dirname(__file__)
     out_folder = os.path.join(current_path, "Client_Data")
-    out_path = os.path.join(out_folder, "aggregated_2019_to_2023.json")
+    out_path = os.path.join(out_folder, "Course_Summary_Aggregated_2019_to_2023.json")
     seng_data_aggregated.to_json(out_path)
 
     # Read cleaned data from new file
