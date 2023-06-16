@@ -2,19 +2,19 @@ import numpy as np
 import pandas as pd
 import os.path
 
-def read_cleaned_json():
-    current_path = os.path.dirname(__file__)
-    in_folder = os.path.join(current_path, "Client_Data")
-    in_path = os.path.join(in_folder, "aggregated_2019_to_2023.json")
+def read_cleaned_json(data_folder):
+    in_path = os.path.join(data_folder, "Course_Summary_Aggregated_2019_to_2023.json")
     data = pd.read_json(in_path)
     return(data)
 
-def read_raw_json_from_local_dir():
-    current_path = os.path.dirname(__file__)
-    xl_folder = os.path.join(current_path, "Client_Data")
-    # Read from two locally stored excel sheets while we wait on the db connection
-    path_enrollment_19_to_21 = os.path.join(xl_folder, "Course_Summary_2019_2021.json")
-    path_enrollment_22_to_23 = os.path.join(xl_folder, "Course_Summary_2022_2023.json")
+def output_cleaned_json(data_folder, data):
+    in_path = os.path.join(data_folder, "Course_Summary_Aggregated_2019_to_2023.json")
+    data.to_json(out_path)
+
+def read_raw_json_from_local_dir(data_folder):
+    # Read from two locally stored json files
+    path_enrollment_19_to_21 = os.path.join(data_folder, "Course_Summary_2019_2021.json")
+    path_enrollment_22_to_23 = os.path.join(data_folder, "Course_Summary_2022_2023.json")
     enrollment_19_to_21 = pd.read_json(path_enrollment_19_to_21)
     enrollment_22_to_23 = pd.read_json(path_enrollment_22_to_23)
     # Combine relevant columns of the two sheets into one dataframe
@@ -62,22 +62,21 @@ def sum_course_enrollments(cleaned_data):
     return(aggregated_data)
 
 def main():
-    raw_data = read_raw_json_from_local_dir()
-    cleaned_data = clean_raw_data(raw_data)
+    # Set up working directory to read and write json files
+    path = os.getcwd()
+    parent = os.path.dirname(path)
+    data_folder = os.path.join(parent, "myapp/modules/Client_Data")
+    # Read and clean raw json data
+    data = read_raw_json_from_local_dir(data_folder)
+    cleaned_data = clean_raw_data(data)
     seng_data = filter_by_seng_program_courses(cleaned_data)
     seng_data_aggregated = sum_course_enrollments(seng_data)
-    print(seng_data_aggregated)
-
     # Output cleaned data as json file in Client_Data dir
-    current_path = os.path.dirname(__file__)
-    out_folder = os.path.join(current_path, "Client_Data")
-    out_path = os.path.join(out_folder, "Course_Summary_Aggregated_2019_to_2023.json")
+    out_path = os.path.join(data_folder, "Course_Summary_Aggregated_2019_to_2023.json")
     seng_data_aggregated.to_json(out_path)
-
     # Read cleaned data from new file
-    data = read_cleaned_json()
+    data = read_cleaned_json(data_folder)
     print(data)
 
 if __name__ == "__main__":
-    print(pd.__version__)
     main()
