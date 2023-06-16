@@ -23,13 +23,15 @@ jobs:
 
     - name: Wait for Application to be ready
       run: sleep 60 # Wait for 60 seconds for application to be ready
-
+    
+    - name: Print application logs
+      run: docker-compose logs
+    
     - name: Test Application
       run: |
-        wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 5 -qO- --spider http://localhost:8001/predict
+        wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 5 -O- --spider http://localhost:8001/predict
         if [ $? -ne 0 ]; then
           echo "Failed to connect with the Application" && exit 1
         else 
           echo "Application is up and running"
         fi
-
