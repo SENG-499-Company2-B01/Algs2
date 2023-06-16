@@ -1,0 +1,27 @@
+name: Test Applciation Running
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Docker Compose Build
+      run: docker-compose build
+
+    - name: Docker Compose Up
+      run: docker-compose up -d
+
+    - name: Wait for Application to be ready
+      run: sleep 60 # Wait for 60 seconds for application to be ready
+
+    - name: Test Application
+      run: |
+        curl --retry 5 --retry-delay 5 --retry-connrefused http://localhost:8001/predict
+
