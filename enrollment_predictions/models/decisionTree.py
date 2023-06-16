@@ -163,8 +163,8 @@ def predict(X):
     return predictions
 
 def perform_decision_tree():
-    file_path_19_21 = 'Algs2\\myapp\\modules\\Client_Data\\Course_Summary_2019_2021.json'
-    file_path_22_23 = 'Algs2\\myapp\\modules\\Client_Data\\Course_Summary_2022_2023.json'
+    file_path_19_21 = 'Algs2\\data\\client_data\\Course_Summary_2019_2021.json'
+    file_path_22_23 = 'Algs2\\data\\client_data\\Course_Summary_2022_2023.json'
     add_data(file_path_19_21)
     add_data(file_path_22_23)
 

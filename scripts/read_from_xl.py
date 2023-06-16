@@ -4,7 +4,7 @@ import os.path
 
 def read_xl_from_local_dir():
     current_path = os.path.dirname(__file__)
-    xl_folder = os.path.join(current_path, "Client_Data")
+    xl_folder = os.path.join(current_path, "../data/client_data")
     # Read from two locally stored excel sheets while we wait on the db connection
     path_enrollment_19_to_21 = os.path.join(xl_folder, "Course Summary_2019_2021.xlsx")
     path_enrollment_22_to_23 = os.path.join(xl_folder, "Course Summary_2022_2023.xlsx")

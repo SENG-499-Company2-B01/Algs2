@@ -1,5 +1,5 @@
 """
-URL configuration for myproject project.
+URL configuration for prediction_service project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -19,5 +19,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('myapp.urls')),
+    path('predict/', include('enrollment_predictions.urls')),
 ]

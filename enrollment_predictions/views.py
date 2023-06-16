@@ -1,10 +1,11 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from .modules.weighted_mean_alg import weighted_mean_by_term
-from .modules.read_from_xl import read_xl_from_local_dir
+from read_from_xl import read_xl_from_local_dir
 
 
-def my_endpoint(request):
+
+def predict_endpoint(request):
     data = read_xl_from_local_dir()
     courses = weighted_mean_by_term(data, 0.5, 0.25, 0.25)
     html = "<html><body><h1>Weighted Mean Prediction Results:</h1><ul>"
