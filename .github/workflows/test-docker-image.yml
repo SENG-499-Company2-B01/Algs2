@@ -21,8 +21,8 @@ jobs:
     - name: Docker Compose Up
       run: docker-compose up -d
 
-    #- name: Wait for Application to be ready
-    #  run: sleep 60 # Wait for 60 seconds for application to be ready
+    - name: Wait for Application to be ready
+      run: sleep 60 # Wait for 60 seconds for application to be ready
 
     - name: Test Application
       run: |
