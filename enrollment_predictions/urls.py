@@ -3,7 +3,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.predict_endpoint, name='predict'),
+    path('generate/', views.generate, name='generate'),
+    path('notify/', views.notify, name='notify'),
 ]
 
 

@@ -6,10 +6,10 @@ def read_xl_from_local_dir():
     current_path = os.path.dirname(__file__)
     xl_folder = os.path.join(current_path, "../data/client_data")
     # Read from two locally stored excel sheets while we wait on the db connection
-    path_enrollment_19_to_21 = os.path.join(xl_folder, "Course Summary_2019_2021.xlsx")
-    path_enrollment_22_to_23 = os.path.join(xl_folder, "Course Summary_2022_2023.xlsx")
-    enrollment_19_to_21 = pd.read_excel(path_enrollment_19_to_21)
-    enrollment_22_to_23 = pd.read_excel(path_enrollment_22_to_23)
+    path_enrollment_19_to_21 = "/usr/src/app/myapp/modules/Client_Data/Course_Summary_2019_2021.json"
+    path_enrollment_22_to_23 = "/usr/src/app/myapp/modules/Client_Data/Course_Summary_2022_2023.json"
+    enrollment_19_to_21 = pd.read_json(path_enrollment_19_to_21)
+    enrollment_22_to_23 = pd.read_json(path_enrollment_22_to_23)
     # Combine relevant columns of the two sheets into one dataframe
     columns = ["Term", "Subj", "Num", "Enrolled"]
     data = pd.concat([enrollment_19_to_21[columns], enrollment_22_to_23[columns]])
