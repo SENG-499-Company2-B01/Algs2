@@ -1,6 +1,6 @@
 import pandas as pd
 
-path = "myapp/modules/Client_Data/"
+path = "data/client_data/"
 
 def excel_to_json(excel_file, json_file):
     data = pd.read_excel(excel_file)
