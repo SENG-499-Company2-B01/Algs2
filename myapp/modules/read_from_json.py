@@ -2,7 +2,14 @@ import numpy as np
 import pandas as pd
 import os.path
 
-def read_json_from_local_dir():
+def read_cleaned_json():
+    current_path = os.path.dirname(__file__)
+    in_folder = os.path.join(current_path, "Client_Data")
+    in_path = os.path.join(in_folder, "aggregated_2019_to_2023.json")
+    data = pd.read_json(in_path)
+    return(data)
+
+def read_raw_json_from_local_dir():
     current_path = os.path.dirname(__file__)
     xl_folder = os.path.join(current_path, "Client_Data")
     # Read from two locally stored excel sheets while we wait on the db connection
@@ -66,6 +73,10 @@ def main():
     out_folder = os.path.join(current_path, "Client_Data")
     out_path = os.path.join(out_folder, "aggregated_2019_to_2023.json")
     seng_data_aggregated.to_json(out_path)
+
+    # Read cleaned data from new file
+    data = read_cleaned_json()
+    print(data)
 
 if __name__ == "__main__":
     print(pd.__version__)
