@@ -30,11 +30,13 @@ jobs:
     - name: Test Application
       run: |
         echo "Starting application test..."
-        wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 5 -O- --spider http://localhost:8001/predict
+        response=$(wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 5 -O- --spider http://localhost:8001/predict 2>&1)
         if [ $? -ne 0 ]; then
-          echo "ERROR: Failed to connect with the Application." >&2
+          echo "ERROR: Failed to connect with the Application."
+          echo "Error Response: $response" >&2
           exit 1
         else 
-          echo "SUCCESS: Application is up and running."
+          echo "SUCCESS: The remote file exists. Application is up and running."
         fi
+    
     
