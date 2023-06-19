@@ -1,5 +1,4 @@
-name: Test Applciation Running
-
+name: Django CI
 
 on:
   push:
@@ -7,35 +6,25 @@ on:
   pull_request:
     branches: [ "main" ]
 
-
 jobs:
   build:
+
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
 
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Docker Compose Build
-      run: docker-compose build
-
-    - name: Docker Compose Up
-      run: docker-compose up -d
-
-    - name: Wait for Application to be ready
-      run: sleep 10 # Wait for 10 seconds for application to be ready
-    
-    - name: Print application logs
-      run: docker-compose logs
-
-    - name: Test Application
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
       run: |
-        echo "Starting application test..."
-        response=$(wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 5 -O- --spider http://localhost:8001/predict 2>&1)
-        if [ $? -ne 0 ]; then
-          echo "ERROR: Failed to connect with the Application."
-          echo "Error Response: $response" >&2
-          exit 1
-        else 
-          echo "SUCCESS: The remote file exists. Application is up and running."
-        fi
-    
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run Tests
+      run: |
+        python manage.py test
