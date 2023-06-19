@@ -8,7 +8,7 @@ FROM python:3.8-slim-buster
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_ENV dev
 ENV DOCKER_CONTAINER 1
-ENV PORT 8001
+ENV PORT 8000
 
 # Set work directory
 WORKDIR /usr/src/app
