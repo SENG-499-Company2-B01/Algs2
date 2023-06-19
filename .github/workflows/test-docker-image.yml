@@ -26,13 +26,15 @@ jobs:
     
     - name: Print application logs
       run: docker-compose logs
-    
+
     - name: Test Application
       run: |
-        APP_CONTAINER_ID=$(docker ps -aqf "name=your_container_name")
-        docker exec $APP_CONTAINER_ID your_test_command_here
+        echo "Starting application test..."
+        wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 5 -O- --spider http://localhost:8001/predict
         if [ $? -ne 0 ]; then
-          echo "Failed to connect with the Application" && exit 1
+          echo "ERROR: Failed to connect with the Application." >&2
+          exit 1
         else 
-          echo "Application is up and running"
+          echo "SUCCESS: Application is up and running."
         fi
+    
