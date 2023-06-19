@@ -49,8 +49,8 @@ def get_data(file_path):
 
 # NEED TO CHANGE SO IT CALLS BACKEND TO GET DATA
 def import_data():
-    file_path_19_21 = 'Algs2\\data\\client_data\\Course_Summary_2019_2021.json'
-    file_path_22_23 = 'Algs2\\data\\Client_Data\\Course_Summary_2022_2023.json'
+    file_path_19_21 = 'Algs2/data/client_data/Course_Summary_2019_2021.json'
+    file_path_22_23 = 'Algs2/data/Client_Data/Course_Summary_2022_2023.json'
     add_data(get_data(file_path_19_21))
     add_data(get_data(file_path_22_23))
 
@@ -76,37 +76,37 @@ def change_features(type, features):
     if type == 'cat':
         cat_features = features
         # Save features to json file
-        with open('Algs2\\data\\model_data\\cat_features.json', 'w') as f:
+        with open('Algs2/data/model_data/cat_features.json', 'w') as f:
             json.dump(cat_features, f)
     elif type == 'num':
         num_features = features
         # Save features to json file
-        with open('Algs2\\data\\model_data\\num_features.json', 'w') as f:
+        with open('Algs2/data/model_data/num_features.json', 'w') as f:
             json.dump(num_features, f)
     elif type == 'target':
         target = features
         # Save features to json file
-        with open('Algs2\\data\\model_data\\target.json', 'w') as f:
+        with open('Algs2/data/model_data/target.json', 'w') as f:
             json.dump(target, f)
 
 def import_features():
     global cat_features, num_features, target
 
     # Load features from json file
-    with open('Algs2\\data\\model_data\\cat_features.json') as f:
+    with open('Algs2/data/model_data/cat_features.json') as f:
         cat_features = json.load(f)
-    with open('Algs2\\data\\model_data\\num_features.json') as f:
+    with open('Algs2/data/model_data/num_features.json') as f:
         num_features = json.load(f)
-    with open('Algs2\\data\\model_data\\target.json') as f:
+    with open('Algs2/data/model_data/target.json') as f:
         target = json.load(f)
 
 def save_all_features():
     # Save features to json file
-    with open('Algs2\\data\\model_data\\cat_features.json', 'w') as f:
+    with open('Algs2/data/model_data/cat_features.json', 'w') as f:
         json.dump(cat_features, f)
-    with open('Algs2\\data\\model_data\\num_features.json', 'w') as f:
+    with open('Algs2/data/model_data/num_features.json', 'w') as f:
         json.dump(num_features, f)
-    with open('Algs2\\data\\model_data\\target.json', 'w') as f:
+    with open('Algs2/data/model_data/target.json', 'w') as f:
         json.dump(target, f)
 
 def create_pipeline(cat_features, num_features):
@@ -146,12 +146,12 @@ def train_model():
     model.fit(X_train, y_train)
 
     # Save the model to Model_Data folder
-    joblib.dump(model, "Algs2\\data\\model_data\\\\model.pkl")
+    joblib.dump(model, "Algs2/data/model_data//model.pkl")
 
 def import_model():
     global model
 
-    model = joblib.load("Algs2\\data\\model_data\\model.pkl")
+    model = joblib.load("Algs2/data/model_data/model.pkl")
 
 def predict(X):
 
@@ -163,8 +163,8 @@ def predict(X):
     return predictions
 
 def perform_decision_tree():
-    file_path_19_21 = 'Algs2\\data\\client_data\\Course_Summary_2019_2021.json'
-    file_path_22_23 = 'Algs2\\data\\client_data\\Course_Summary_2022_2023.json'
+    file_path_19_21 = 'Algs2/data/client_data/Course_Summary_2019_2021.json'
+    file_path_22_23 = 'Algs2/data/client_data/Course_Summary_2022_2023.json'
     add_data(file_path_19_21)
     add_data(file_path_22_23)
 
