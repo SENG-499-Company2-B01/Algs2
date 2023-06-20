@@ -158,7 +158,7 @@ def create_pipeline(cat_features, num_features):
 
     return preprocessing
 
-def train_model(model_type="random_forest"):
+def train_model(model_type):
     global model
     if X_train is None or X_valid is None or y_train is None or y_valid is None:
         get_training_data()
@@ -176,7 +176,7 @@ def train_model(model_type="random_forest"):
     elif model_type == "random_forest":
         model = Pipeline([
             ("preprocessing", preprocessing),
-            ("RandomForestRegressor", RandomForestRegressor())
+            ("RandomForestRegressor", RandomForestRegressor(n_estimators = 1000))
         ])
     elif model_type == "linear_regression":
         model = Pipeline([
@@ -189,7 +189,7 @@ def train_model(model_type="random_forest"):
     model.fit(X_train, y_train)
     joblib.dump(model, model_path+model_type+".pkl")
 
-def import_model(model_type="random_forest", auto_retrain_model=False):
+def import_model(model_type, auto_retrain_model=False):
     global model
 
     temp_model_path = "data/model_data/"+model_type+".pkl"
@@ -199,50 +199,61 @@ def import_model(model_type="random_forest", auto_retrain_model=False):
     else:
         model = joblib.load(temp_model_path)
 
-def predict(X, model_type="random_forest"):
+def predict(X, model_type):
     import_model(model_type)
 
     predictions = model.predict(X)
     return predictions
 
-def perform_model(model_type="random_forest"):
+def perform_model(model_type):
 
     train_model(model_type)
 
     score = model.score(X_valid, y_valid)
-    predictions = predict(X_valid)
+    predictions = predict(X_valid, model_type)
 
     return score, predictions
 
 def main():
     # get_training_data()
-
     # predictions = predict(X_valid)
     # for i in range(len(predictions)):
     #     print(X_valid.loc[X_valid.index[i], 'Course'], X_valid.loc[X_valid.index[i], 'Year'], X_valid.loc[X_valid.index[i], 'Term'])
     #     print("Predicted: {:.2f} Actual: {:.2f}".format(predictions[i][0], y_valid.iloc[i, 0]))
     #     print()
 
-    score, _ = perform_model("decision_tree")
-    print("R-squared score: {:.2f}".format(score))
-    score, _ = perform_model("random_forest")
-    print("R-squared score: {:.2f}".format(score))
-    score, _ = perform_model("linear_regression")
-    print("R-squared score: {:.2f}".format(score))
-
     from sklearn.metrics import mean_squared_error
     from math import sqrt
-    train_model("decision_tree")
-    predictions = predict(X_valid)
-    rmse = sqrt(mean_squared_error(y_valid, predictions))
-    print("RMSE: {:.2f}".format(rmse))
-    train_model("random_forest")
-    predictions = predict(X_valid)
-    rmse = sqrt(mean_squared_error(y_valid, predictions))
-    print("RMSE: {:.2f}".format(rmse))
-    train_model("linear_regression")
-    predictions = predict(X_valid)
-    rmse = sqrt(mean_squared_error(y_valid, predictions))
+    import numpy as np
+
+    score, predictions_dt = perform_model("decision_tree")
+    rmse_dt = sqrt(mean_squared_error(y_valid, predictions_dt))
+    errors_dt = abs(predictions_dt - y_valid.values)
+    print(predictions_dt.mean())
+    print("R-squared score: {:.2f}".format(score))
+    print("RMSE: {:.2f}".format(rmse_dt))
+    print('Average error: ', round(np.mean(errors_dt), 2))
+    score, predictions_rf = perform_model("random_forest")
+    rmse_rf = sqrt(mean_squared_error(y_valid, predictions_rf))
+    errors_rf = abs(predictions_rf - y_valid.values)
+    print(predictions_rf.mean())
+    print("R-squared score: {:.2f}".format(score))
+    print("RMSE: {:.2f}".format(rmse_rf))
+    print('Average error: ', round(np.mean(errors_rf), 2))
+    score, predictions_lr = perform_model("linear_regression")
+    rmse_lr = sqrt(mean_squared_error(y_valid, predictions_lr))
+    errors_lr = abs(predictions_lr - y_valid.values)
+    print(predictions_lr.mean())
+    print("R-squared score: {:.2f}".format(score))
+    print("RMSE: {:.2f}".format(rmse_lr))
+    print('Average error: ', round(np.mean(errors_lr), 2))
+    
+    baseline_preds = [y_train.mean()] * len(y_valid)
+    baseline_preds = pd.DataFrame(baseline_preds, index=y_valid.index)
+    baseline_error = abs(baseline_preds - y_valid)
+    rmse = sqrt(mean_squared_error(y_valid, baseline_preds))
+
+    print('Average baseline error: ', round(np.mean(baseline_error), 2))
     print("RMSE: {:.2f}".format(rmse))
     
 
