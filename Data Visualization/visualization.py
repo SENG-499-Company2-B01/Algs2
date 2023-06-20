@@ -18,9 +18,17 @@ def plotPredictionsVsActual(predictions, actual_values):
     plt.plot(data['Predictions'], label='Predictions')
     plt.plot(data['Actual Values'], label='Actual Values')
     plt.title('Class Enrollment Predictions vs Actual Values')
-    plt.xlabel('Index')
+    plt.xlabel('Course')
     plt.ylabel('Number of Students')
     plt.legend()
+    plt.show()
+
+def plotRScores(models, scores):
+    plt.figure(figsize=(10, 5))
+    plt.plot(models, scores)
+    plt.title('R-squared scores')
+    plt.xlabel('Model')
+    plt.ylabel('Score')
     plt.show()
 
 def main():
