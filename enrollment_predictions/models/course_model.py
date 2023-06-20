@@ -94,6 +94,15 @@ def get_training_data():
 
     X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, random_state=42)
 
+def generate_features():
+    global cat_features, num_features, target
+
+    cat_features = ["Term", "Subj", "Course", "Section", "Instructor"]
+    num_features = ['Year']
+    target = ['Enrolled']
+
+    save_all_features()
+
 def change_features(type, features):
     global cat_features, num_features, target
 
@@ -113,12 +122,15 @@ def change_features(type, features):
 def import_features():
     global cat_features, num_features, target
 
-    with open('data/model_data/cat_features.json') as f:
-        cat_features = json.load(f)
-    with open('data/model_data/num_features.json') as f:
-        num_features = json.load(f)
-    with open('data/model_data/target.json') as f:
-        target = json.load(f)
+    if not os.path.isfile('data/model_data/cat_features.json') or not os.path.isfile('data/model_data/num_features.json') or not os.path.isfile('data/model_data/target.json'):
+        generate_features()
+    else:
+        with open('data/model_data/cat_features.json') as f:
+            cat_features = json.load(f)
+        with open('data/model_data/num_features.json') as f:
+            num_features = json.load(f)
+        with open('data/model_data/target.json') as f:
+            target = json.load(f)
 
 def save_all_features():
     with open('data/model_data/cat_features.json', 'w') as f:
