@@ -7,7 +7,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
+from math import sqrt
 import joblib
 import json
 import os
@@ -50,11 +51,17 @@ def get_target():
 def get_model():
     return model
 
+def getRSME(predictions):
+    return sqrt(mean_squared_error(y_valid, predictions))
+
+def getErrors(predictions):
+    return abs(predictions - y_valid.values)
+
 def add_data(new_data):
     global data
     data = pd.concat([data, new_data])
 
-def get_data(data):
+def format_data(data):
     data = data[data['Subj'].isin(['SENG', 'CSC', 'ECE'])]
     data = data[data['Sched Type'].isin(['LEC'])]
     data['Year'] = data['Start Date'].str.split('-').str[0].astype(int)
@@ -77,8 +84,8 @@ def get_data(data):
 def import_data():
     data_19_21 = pd.read_json('data/client_data/Course_Summary_2019_2021.json')
     data_22_23 = pd.read_json('data/client_data/Course_Summary_2022_2023.json')
-    add_data(get_data(data_19_21))
-    add_data(get_data(data_22_23))
+    add_data(format_data(data_19_21))
+    add_data(format_data(data_22_23))
 
 def get_training_data():
     global X_train, X_valid, y_train, y_valid
@@ -222,27 +229,25 @@ def main():
     #     print("Predicted: {:.2f} Actual: {:.2f}".format(predictions[i][0], y_valid.iloc[i, 0]))
     #     print()
 
-    from sklearn.metrics import mean_squared_error
-    from math import sqrt
     import numpy as np
 
     score, predictions_dt = perform_model("decision_tree")
-    rmse_dt = sqrt(mean_squared_error(y_valid, predictions_dt))
-    errors_dt = abs(predictions_dt - y_valid.values)
+    rmse_dt = getRSME(predictions_dt)
+    errors_dt = getErrors(predictions_dt)
     print(predictions_dt.mean())
     print("R-squared score: {:.2f}".format(score))
     print("RMSE: {:.2f}".format(rmse_dt))
     print('Average error: ', round(np.mean(errors_dt), 2))
     score, predictions_rf = perform_model("random_forest")
-    rmse_rf = sqrt(mean_squared_error(y_valid, predictions_rf))
-    errors_rf = abs(predictions_rf - y_valid.values)
+    rmse_rf = getRSME(predictions_rf)
+    errors_rf = getErrors(predictions_rf)
     print(predictions_rf.mean())
     print("R-squared score: {:.2f}".format(score))
     print("RMSE: {:.2f}".format(rmse_rf))
     print('Average error: ', round(np.mean(errors_rf), 2))
     score, predictions_lr = perform_model("linear_regression")
-    rmse_lr = sqrt(mean_squared_error(y_valid, predictions_lr))
-    errors_lr = abs(predictions_lr - y_valid.values)
+    rmse_lr = getRSME(predictions_lr)
+    errors_lr = getErrors(predictions_lr)
     print(predictions_lr.mean())
     print("R-squared score: {:.2f}".format(score))
     print("RMSE: {:.2f}".format(rmse_lr))
