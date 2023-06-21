@@ -3,9 +3,20 @@ import pandas as pd
 
 # Import modules
 import sys
-sys.path.append('../myapp/modules')
-import weighted_mean_alg as wma
-import linearRegression as lr
+sys.path.append('../enrollment_predictions/models')
+import course_model as models
+
+def plotData():
+    # read data
+    data = pd.read_csv('../data/Course_Summary_2022_2023.csv')
+
+    # plot data
+    plt.figure(figsize=(10, 5))
+    plt.plot(data['Course'], data['Enrollment'])
+    plt.title('Class Enrollment')
+    plt.xlabel('Course')
+    plt.ylabel('Number of Students')
+    plt.show()
 
 def plotPredictionsVsActual(predictions, actual_values):
     data = pd.DataFrame({
