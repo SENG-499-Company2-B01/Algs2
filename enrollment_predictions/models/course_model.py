@@ -190,6 +190,8 @@ def train_model(model_type):
             ("preprocessing", preprocessing),
             ("LinearRegression", LinearRegression())
         ])
+    elif model_type == "most_recent":
+        return
     else:
         raise ValueError("Invalid model type")
 
@@ -207,17 +209,38 @@ def import_model(model_type, auto_retrain_model=False):
         model = joblib.load(temp_model_path)
 
 def predict(X, model_type):
+    if model_type == "most_recent":
+        return predict_most_recent(X)
+
     import_model(model_type)
 
     predictions = model.predict(X)
+    return predictions
+
+def predict_most_recent(X):
+    global data
+
+    predictions = []
+    for ind, row in X.iterrows():
+        temp = data[data['Course'] == row['Course']]
+        temp = temp[temp['Section'] == row['Section']]
+        temp = temp[temp['Term'] == row['Term']]
+        if temp.empty:
+            predictions.append(0)
+        else:
+            predictions.append(temp.at[temp['Year'].idxmax(), 'Enrolled'])
+
     return predictions
 
 def perform_model(model_type):
 
     train_model(model_type)
 
-    score = model.score(X_valid, y_valid)
     predictions = predict(X_valid, model_type)
+    if model_type == "most_recent":
+        score = 0
+    else:
+        score = model.score(X_valid, y_valid)
 
     return score, predictions
 
@@ -230,7 +253,6 @@ def main():
     #     print()
 
     import numpy as np
-
     score, predictions_dt = perform_model("decision_tree")
     rmse_dt = getRSME(predictions_dt)
     errors_dt = getErrors(predictions_dt)
@@ -260,6 +282,12 @@ def main():
 
     print('Average baseline error: ', round(np.mean(baseline_error), 2))
     print("RMSE: {:.2f}".format(rmse))
+    
+    score, predictions_dt = perform_model("most_recent")
+    rmse_dt = sqrt(mean_squared_error(y_valid, predictions_dt))
+    errors_dt = abs(predictions_dt - y_valid.values)
+    print("RMSE: {:.2f}".format(rmse_dt))
+    print('Average error: ', round(np.mean(errors_dt), 2))
     
 
 if __name__ == "__main__":
