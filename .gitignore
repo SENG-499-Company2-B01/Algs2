@@ -1,3 +1,8 @@
+## Prediction Ignores:
+data/model_data/*
+
+## PYTHON TEMPLATE gitignore file:
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
