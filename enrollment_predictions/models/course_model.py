@@ -248,7 +248,6 @@ def main():
     from sklearn.metrics import mean_squared_error
     from math import sqrt
     import numpy as np
-    """
     score, predictions_dt = perform_model("decision_tree")
     rmse_dt = sqrt(mean_squared_error(y_valid, predictions_dt))
     errors_dt = abs(predictions_dt - y_valid.values)
@@ -278,7 +277,6 @@ def main():
 
     print('Average baseline error: ', round(np.mean(baseline_error), 2))
     print("RMSE: {:.2f}".format(rmse))
-    """
     
     score, predictions_dt = perform_model("most_recent")
     rmse_dt = sqrt(mean_squared_error(y_valid, predictions_dt))
