@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -218,11 +219,13 @@ def predict(X, model_type):
     return predictions
 
 def predict_most_recent(X):
-    global data
+    global X_train, y_train
 
+    X_train_with_Y = X_train.copy()
+    X_train_with_Y['Enrolled'] = y_train
     predictions = []
     for ind, row in X.iterrows():
-        temp = data[data['Course'] == row['Course']]
+        temp = X_train_with_Y[X_train_with_Y['Course'] == row['Course']]
         temp = temp[temp['Section'] == row['Section']]
         temp = temp[temp['Term'] == row['Term']]
         if temp.empty:
@@ -252,7 +255,6 @@ def main():
     #     print("Predicted: {:.2f} Actual: {:.2f}".format(predictions[i][0], y_valid.iloc[i, 0]))
     #     print()
 
-    import numpy as np
     score, predictions_dt = perform_model("decision_tree")
     rmse_dt = getRSME(predictions_dt)
     errors_dt = getErrors(predictions_dt)
@@ -283,11 +285,11 @@ def main():
     print('Average baseline error: ', round(np.mean(baseline_error), 2))
     print("RMSE: {:.2f}".format(rmse))
     
-    score, predictions_dt = perform_model("most_recent")
-    rmse_dt = sqrt(mean_squared_error(y_valid, predictions_dt))
-    errors_dt = abs(predictions_dt - y_valid.values)
-    print("RMSE: {:.2f}".format(rmse_dt))
-    print('Average error: ', round(np.mean(errors_dt), 2))
+    score, predictions_mr = perform_model("most_recent")
+    rmse_mr = getRSME(y_valid, predictions_mr)
+    errors_mr = getErrors(predictions_mr)
+    print("RMSE: {:.2f}".format(rmse_mr))
+    print('Average error: ', round(np.mean(errors_mr), 2))
     
 
 if __name__ == "__main__":
