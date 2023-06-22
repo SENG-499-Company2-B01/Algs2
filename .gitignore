@@ -1,5 +1,5 @@
 ## Prediction Ignores:
-data/model_data/*
+.vscode/
 
 ## PYTHON TEMPLATE gitignore file:
 
