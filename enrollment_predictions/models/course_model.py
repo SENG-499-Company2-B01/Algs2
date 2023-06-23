@@ -286,7 +286,7 @@ def main():
     print("RMSE: {:.2f}".format(rmse))
     
     score, predictions_mr = perform_model("most_recent")
-    rmse_mr = getRSME(y_valid, predictions_mr)
+    rmse_mr = getRSME(predictions_mr)
     errors_mr = getErrors(predictions_mr)
     print("RMSE: {:.2f}".format(rmse_mr))
     print('Average error: ', round(np.mean(errors_mr), 2))
