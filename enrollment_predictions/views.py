@@ -1,18 +1,13 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-from .modules.weighted_mean_alg import weighted_mean_by_term
-from scripts.read_from_xl import read_xl_from_local_dir
-from .models.linearRegression import perform_linear_regression
 from .models.decisionTree import train_model
-from .models.decisionTree import perform_decision_tree
 import requests
-
-BACKEND_URL = "http://localhost:8000" # this will change
-
-#TODO: Get data from backend, not local files
+from os import environ
 
 def request_schedule(schedule_id):
-    schedule = requests.get(BACKEND_URL + '/getSchedule', {'scheduleId': schedule_id})
+    schedule = requests.get(environ["BACKEND_URL"] + '/getSchedule', {'scheduleId': schedule_id})
+    return schedule
+
+def request_historic_schedule():
+    schedule = requests.get(environ["BACKEND_URL"] + '/getSchedule/past/')
     return schedule
 
 def extract_fields_from_schedule(schedule, fields):
@@ -25,7 +20,7 @@ def generate(request):
     # If no schedule is returned, perform simple prediction
     if not schedule:
         # Get courses from database
-        courses_response = requests.get(BACKEND_URL + '/courses')
+        courses_response = requests.get(environ["BACKEND_URL"] + '/courses')
         # Format course data in correct way for linreg prediction
         # results = predict_linreg(courses)
         pass
