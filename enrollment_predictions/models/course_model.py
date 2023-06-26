@@ -215,8 +215,7 @@ def predict(X, model_type):
 
     import_model(model_type)
 
-    predictions = model.predict(X)
-    return predictions
+    return model.predict(X).clip(min=0)
 
 def predict_most_recent(X):
     global X_train, y_train
