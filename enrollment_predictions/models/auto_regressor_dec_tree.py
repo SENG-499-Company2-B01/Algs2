@@ -2,7 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.impute import SimpleImputer
 from lightgbm import LGBMRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.model_selection import GridSearchCV
 import matplotlib.patches as mpatches
 import re
 
@@ -42,8 +46,7 @@ def remove_unnecessary_columns(data):
     data.drop(columns=['Term', 'CRN', 'Num', 'Title', 'Units', 'Begin', 'End', 'Days', 'Start_Date', 'End_Date', 'Bldg', 'Room', 'Sched_Type', 'Course'], inplace=True)
     return data
 
-def feature_engineering(data):
-    window_sizes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+def feature_engineering(data, window_sizes):
     course_groups = data.groupby('Course')
 
     for win in window_sizes:
@@ -68,32 +71,61 @@ def prepare_data(data, first_year, train_end_year, predict_year):
         return None, None, None, None
 
     # Apply feature engineering to the train and validation sets separately
-    train_data = feature_engineering(train_data)
-    val_data = feature_engineering(val_data)
+    window_sizes = [2, 3, 6, 9]
+    train_data = feature_engineering(train_data, window_sizes)
+    val_data = feature_engineering(val_data, window_sizes)
     
     train_data = remove_unnecessary_columns(train_data)
     val_data = remove_unnecessary_columns(val_data)
     
-
-    exclude_columns = ['Year', 'Season', 'Enrolled', 'CourseOffering'] 
+    exclude_columns = ['Year', 'Season', 'Enrolled'] 
 
     train_features = train_data.columns[~train_data.columns.isin(exclude_columns)]
     train_target = ['Enrolled', 'CourseOffering'] 
 
     val_features = val_data.columns[~val_data.columns.isin(exclude_columns)]
     val_target = ['Enrolled', 'CourseOffering'] 
+    
+    # Exclude 'CourseOffering' before imputation
+    X_train = train_data[train_features].drop(columns=['CourseOffering'])
+    X_val = val_data[val_features].drop(columns=['CourseOffering'])
 
-    return train_data[train_features], train_data[train_target], val_data[val_features], val_data[val_target]
+    # Impute missing values
+    imp = SimpleImputer()
+    X_train_imputed = imp.fit_transform(X_train)
+    X_val_imputed = imp.transform(X_val)
+
+    return pd.DataFrame(X_train_imputed, columns=X_train.columns), train_data[train_target], pd.DataFrame(X_val_imputed, columns=X_val.columns), val_data[val_target]
 
 
-def model_training(X_train, y_train):
+def model_training_grid_search(X_train, y_train, model = RandomForestRegressor()):
+    param_grid = {
+        'n_estimators': [9, 10, 11, 13, 15],
+        'max_depth': [80, 85, 90, 95, 100],
+        'min_samples_split': [3, 4, 5, 6, 7, 8, 9, 10],
+        'min_samples_leaf': [1, 2],
+    }
     try:
-        model = LGBMRegressor()
+        grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring='neg_mean_absolute_error', verbose=2, n_jobs=-1)
+        grid_search.fit(X_train, y_train['Enrolled'])
+
+        best_model = grid_search.best_estimator_
+        print("Best Parameters: ", grid_search.best_params_)
+
+
+        return best_model
+    except Exception as e:
+        print("Error occurred during model training:", str(e))
+        return None
+    
+def model_training(X_train, y_train, model = RandomForestRegressor()):
+    try:
         model.fit(X_train, y_train['Enrolled'])
         return model
     except Exception as e:
         print("Error occurred during model training:", str(e))
         return None
+    
 
 def model_evaluation(model, X_val, y_val):
     y_pred = model.predict(X_val)
@@ -134,7 +166,17 @@ def run_prediction_for_year(data, first_year, train_end_year):
         print("Error: The training data is not sorted in chronological order.")
         return None, None, None
 
-    model = model_training(X_train, y_train)
+    
+    #regressor = RandomForestRegressor(n_estimators=13, max_depth=90, min_samples_split=3, min_samples_leaf=1)
+    #regressor = RandomForestRegressor()
+    regressor = GradientBoostingRegressor()
+    #regressor = LGBMRegressor()
+    model = model_training(X_train, y_train, model=regressor)
+    
+    #For hyperparameter tuning
+    #model = model_training_grid_search(X_train, y_train, model=regressor)
+    
+    
 
     if model is None:
         print("Error: Failed during model training.")
