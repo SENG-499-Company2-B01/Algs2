@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import sys
 from pathlib import Path
+from os import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,12 +26,15 @@ sys.path.append(str(BASE_DIR / 'scripts'))
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-icg6tvvp!h)&x17sj1vt^@9(j52(uv3sx8^_ivca#bl9=8w2b1'
+SECRET_KEY = environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if environ["DJANGO_MODE"] == 'dev':
+    DEBUG = True
+else:
+    DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', environ["HOST_IP"], environ["HOST_NAME"]]
 
 
 # Application definition
