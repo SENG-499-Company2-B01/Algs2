@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import sys
 from pathlib import Path
+from dotenv import load_dotenv, find_dotenv
 from os import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +25,9 @@ sys.path.append(str(BASE_DIR / 'scripts'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
+# Loading vars from env file
+load_dotenv(find_dotenv())
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = environ["SECRET_KEY"]
