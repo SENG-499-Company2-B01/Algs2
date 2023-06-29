@@ -13,6 +13,13 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.9]
+    env:
+      BACKEND_URL: ${{ secrets.BACKEND_URL }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DJANGO_MODE: ${{ secrets.DJANGO_MODE }}
+      HOST_IP: ${{ secrets.HOST_IP }}
+      HOST_NAME: ${{ secrets.HOST_NAME }}
+
 
     steps:
     - uses: actions/checkout@v3
