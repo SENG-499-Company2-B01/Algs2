@@ -52,6 +52,38 @@ def reformat_courses(courses, year, term):
         })
     return reformatted_courses
 
+def reformat_schedules(schedules):
+    '''Takes schedules in the following format:
+    [
+        {
+            “year”: 2019,
+            “terms”: [
+                {
+                “term”: “summer”,
+                “courses”: [
+                    {
+                        “course”: “CSC110”,
+                        “sections”: [
+                            {
+                                "num": “A01”,
+                                “building”: “ECS125”,
+                                “professor”: “Rich.Little”,
+                                “days”: [“M”, ”R”],
+                                “num_seats”: 120,
+                                “start_time”: “08:30”, // 24hr time
+                                “end_time”: “09:50”
+                            }
+                        ]
+                    }
+                    ]
+                }
+            ]
+        },
+        ...
+    ]
+    '''
+    pass
+
 def _term_plain_to_code(term):
     if term == 'spring':
         return '01'

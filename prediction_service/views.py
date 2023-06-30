@@ -26,6 +26,10 @@ def predict(request):
     # Reformat courses for prediction
     courses = utils.reformat_courses(courses, year, term)
 
+    # Get historic schedules from backend
+    historic_schedules = api.request_historic_schedules()
+    
+
     # TODO: Get result. Return 200 OK for now
     return HttpResponse("Sorry nothing to see here yet", status=200) 
 
