@@ -8,6 +8,8 @@ def predict(request):
         return HttpResponse("This is a POST endpoint, silly", status=405)
 
     # Check that year and term are correctly provided
+    print(request.body)
+    print(request.POST)
     year = request.POST.get('year')
     term = request.POST.get('term')
     if not year:
