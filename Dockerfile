@@ -6,7 +6,6 @@ FROM python:3.11-slim-buster
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
-ENV DJANGO_ENV dev
 ENV DOCKER_CONTAINER 1
 ENV PORT 8000
 

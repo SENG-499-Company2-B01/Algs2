@@ -1,14 +1,31 @@
-from . import api
+from .modules import api
+from .modules import utils
+from django.http import HttpResponse
 
 def predict(request):
-    # Get course info from request & backend
+    # Check that request is a POST request
+    if request.method != 'POST':
+        return HttpResponse("This is a POST endpoint, silly", status=405)
+
+    # Check that year and term are correctly provided
     year = request.POST.get('year')
     term = request.POST.get('term')
-    schedule_id = request.POST.get('schedule_id')
+    if not year:
+        return HttpResponse("year is required", status=400)
+    if not term:
+        return HttpResponse("term is required", status=400)
 
-    schedules = api.request_schedules()
-    # TODO: schedule['id'] not finalized 
-    schedule = [schedule for schedule in schedules.json() if schedule['id'] == schedule_id]
+    # Get courses from backend
+    courses = api.request_courses()
+    courses = utils.filter_courses_by_term(courses, term)
+
+    # Reformat courses for prediction
+    courses = utils.reformat_courses(courses, year, term)
+
+    # TODO: Get result. Return 200 OK for now
+    return HttpResponse("Sorry nothing to see here yet", status=200) 
+
+    '''
     # If no schedule is returned, perform simple prediction
     if not schedule:
         # Get courses from database
@@ -22,3 +39,4 @@ def predict(request):
         # e.g. results = predict_dectree(courses, profs, ...)
         # score = perform_decision_tree()
     #TODO: Return predictions to backend (json)
+    '''
