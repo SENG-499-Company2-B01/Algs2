@@ -14,6 +14,8 @@ def predict(request):
         return HttpResponse("year is required", status=400)
     if not term:
         return HttpResponse("term is required", status=400)
+    if not term in ["fall", "spring", "summer"]:
+        return HttpResponse("term must be fall, spring, or summer", status=400)
 
     # Get courses from backend
     courses = api.request_courses()
