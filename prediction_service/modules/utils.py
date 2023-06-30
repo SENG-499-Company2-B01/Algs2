@@ -33,7 +33,8 @@ def reformat_courses(courses, year, term):
             "Term": 202205,
             "Subj": "ADMN",
             "Num": "001",
-            "Section": "W01"
+            "Section": "W01",
+            "Sched Type": "Lec"
         },
         ...
     ]'''
@@ -46,7 +47,8 @@ def reformat_courses(courses, year, term):
             "Term": formatted_term,
             "Subj": subj,
             "Num": num,
-            "Section": "A01" # TODO: A discussion is needed about section
+            "Section": "A01", # TODO: A discussion is needed about section
+            "Sched Type": "Lec"
         })
     return reformatted_courses
 
