@@ -34,8 +34,8 @@ def reformat_courses(courses, year, term):
             "Subj": "ADMN",
             "Num": "001",
             "Section": "W01"
-    },
-    ...
+        },
+        ...
     ]'''
     
     formatted_term = year + _term_plain_to_code(term)
