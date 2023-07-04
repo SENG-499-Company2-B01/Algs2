@@ -1,7 +1,7 @@
 from .modules import api
 from .modules import utils
 from django.http import HttpResponse
-from ..enrollment_predictions.enrollment_predictions import enrollment_predictions
+from enrollment_predictions.enrollment_predictions import enrollment_predictions
 import json
 
 def predict(request):
