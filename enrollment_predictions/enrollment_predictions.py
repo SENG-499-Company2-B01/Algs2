@@ -1,6 +1,6 @@
 from .models.auto_regressor_dec_tree import *
 
-def predict(train_data, X):
+def enrollment_predictions(train_data, X):
     train_data = data_preprocessing(train_data)
     model = train_model(train_data)
 

@@ -1,7 +1,7 @@
 from .modules import api
 from .modules import utils
 from django.http import HttpResponse
-from ..enrollment_predictions.predict import predict
+from ..enrollment_predictions.enrollment_predictions import enrollment_predictions
 import json
 
 def predict(request):
@@ -35,7 +35,7 @@ def predict(request):
     courses = utils.reformat_courses(courses, year, term)
 
     # Perform prediction
-    predictions = predict(historic_schedules, courses)
+    predictions = enrollment_predictions(historic_schedules, courses)
 
     # Reformate predictions
     predictions = utils.reformat_predictions(courses, predictions)
