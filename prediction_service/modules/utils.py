@@ -115,16 +115,13 @@ def reformat_predictions(predictions):
     And returns the list of courses in the following format:
     [
         {
-            "Term": 202205,
-            "Subj": "ADMN",
-            "Num": "001",
-            "Section": "W01",
-            "Sched Type": "Lec",
-            "Enrolled": 50,
+            "course": "SENG499",
+            "estimate": 80,
         },
         ...
     ]
     '''
+    pass
 
 def _term_plain_to_code(term):
     if term == 'spring':
