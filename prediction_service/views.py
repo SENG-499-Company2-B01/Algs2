@@ -2,6 +2,7 @@ from .modules import api
 from .modules import utils
 from django.http import HttpResponse
 from ..enrollment_predictions.predict import predict
+import json
 
 def predict(request):
     # Check that request is a POST request
@@ -9,8 +10,10 @@ def predict(request):
         return HttpResponse("This is a POST endpoint, silly", status=405)
 
     # Check that year and term are correctly provided
-    year = request.POST.get('year')
-    term = request.POST.get('term')
+    body = request.body.decode('utf-8')
+    data = json.loads(body)
+    year = data.get('year')
+    term = data.get('term')
     if not year:
         return HttpResponse("year is required", status=400)
     if not term:

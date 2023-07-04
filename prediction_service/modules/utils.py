@@ -33,7 +33,6 @@ def reformat_courses(courses, year, term):
             "Term": 202205,
             "Subj": "ADMN",
             "Num": "001",
-            "Section": "W01",
             "Sched Type": "Lec"
         },
         ...
@@ -47,8 +46,7 @@ def reformat_courses(courses, year, term):
             "Term": formatted_term,
             "Subj": subj,
             "Num": num,
-            "Section": "A01", # TODO: A discussion is needed about section
-            "Sched Type": "Lec"
+            "Sched Type": "LEC"
         })
     return reformatted_courses
 
@@ -70,6 +68,7 @@ def reformat_schedules(schedules):
                                 “professor”: “Rich.Little”,
                                 “days”: [“M”, ”R”],
                                 “num_seats”: 120,
+                                "enrolled": 100,
                                 “start_time”: “08:30”, // 24hr time
                                 “end_time”: “09:50”
                             }
@@ -87,8 +86,7 @@ def reformat_schedules(schedules):
             "Term": 202205,
             "Subj": "ADMN",
             "Num": "001",
-            "Section": "W01",
-            "Sched Type": "Lec",
+            "Sched Type": "LEC",
             "Enrolled": 50,
         },
         ...
@@ -98,20 +96,33 @@ def reformat_schedules(schedules):
     for schedule in schedules:
         for term in schedule["terms"]:
             for course in term["courses"]:
+                subj, num = _shorthand_to_subj_and_num(course["course"])
+                enrolled = 0
                 for section in course["sections"]:
-                    subj, num = _shorthand_to_subj_and_num(course["course"])
-                    courses.append({
-                        "Term": str(schedule["year"]) + _term_plain_to_code(term["term"]),
-                        "Subj": subj,
-                        "Num": num,
-                        "Section": section["num"],
-                        "Sched Type": "Lec",
-                        # TODO: Add "Enrolled" field
-                    })
+                    enrolled += section["enrolled"]
+                
+                courses.append({
+                    "Term": str(schedule["year"]) + _term_plain_to_code(term["term"]),
+                    "Subj": subj,
+                    "Num": num,
+                    "Sched Type": "LEC",
+                    "Enrolled": enrolled
+                })
     return courses
 
-def reformat_predictions(predictions):
+def reformat_predictions(courses, predictions):
     '''Takes a dataframe with a single column 'Predicted'
+    And a list of courses in the following format:
+    [
+        {
+            "Term": 202205,
+            "Subj": "ADMN",
+            "Num": "001",
+            "Section": "W01",
+            "Sched Type": "LEC"
+        },
+        ...
+    ]
     And returns the list of courses in the following format:
     [
         {
@@ -121,7 +132,14 @@ def reformat_predictions(predictions):
         ...
     ]
     '''
-    pass
+    predictions = []
+    for course, prediction in zip(courses, predictions):
+        predictions.append({
+            "course": course["Subj"] + course["Num"],
+            "estimate": prediction,
+        })
+    return predictions
+        
 
 def _term_plain_to_code(term):
     if term == 'spring':
