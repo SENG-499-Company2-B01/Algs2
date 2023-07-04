@@ -1,6 +1,7 @@
 from .modules import api
 from .modules import utils
 from django.http import HttpResponse
+from ..enrollment_predictions.predict import predict
 
 def predict(request):
     # Check that request is a POST request
@@ -8,8 +9,6 @@ def predict(request):
         return HttpResponse("This is a POST endpoint, silly", status=405)
 
     # Check that year and term are correctly provided
-    print(request.body)
-    print(request.POST)
     year = request.POST.get('year')
     term = request.POST.get('term')
     if not year:
@@ -19,6 +18,12 @@ def predict(request):
     if not term in ["fall", "spring", "summer"]:
         return HttpResponse("term must be fall, spring, or summer", status=400)
 
+    # Get historic schedules from backend
+    historic_schedules = api.request_historic_schedules()
+
+    # Reformat schedules for prediction
+    historic_schedules = utils.reformat_schedules(historic_schedules)
+
     # Get courses from backend
     courses = api.request_courses()
     courses = utils.filter_courses_by_term(courses, term)
@@ -26,12 +31,13 @@ def predict(request):
     # Reformat courses for prediction
     courses = utils.reformat_courses(courses, year, term)
 
-    # Get historic schedules from backend
-    historic_schedules = api.request_historic_schedules()
-    
+    # Perform prediction
+    predictions = predict(historic_schedules, courses)
 
-    # TODO: Get result. Return 200 OK for now
-    return HttpResponse("Sorry nothing to see here yet", status=200) 
+    # Reformate predictions
+    predictions = utils.reformat_predictions(courses, predictions)
+    
+    return HttpResponse(predictions, status=200) 
 
     '''
     # If no schedule is returned, perform simple prediction

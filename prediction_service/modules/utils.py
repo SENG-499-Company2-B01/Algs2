@@ -81,8 +81,50 @@ def reformat_schedules(schedules):
         },
         ...
     ]
+    And returns the list of courses in the following format:
+    [
+        {
+            "Term": 202205,
+            "Subj": "ADMN",
+            "Num": "001",
+            "Section": "W01",
+            "Sched Type": "Lec",
+            "Enrolled": 50,
+        },
+        ...
+    ]
     '''
-    pass
+    courses = []
+    for schedule in schedules:
+        for term in schedule["terms"]:
+            for course in term["courses"]:
+                for section in course["sections"]:
+                    subj, num = _shorthand_to_subj_and_num(course["course"])
+                    courses.append({
+                        "Term": str(schedule["year"]) + _term_plain_to_code(term["term"]),
+                        "Subj": subj,
+                        "Num": num,
+                        "Section": section["num"],
+                        "Sched Type": "Lec",
+                        # TODO: Add "Enrolled" field
+                    })
+    return courses
+
+def reformat_predictions(predictions):
+    '''Takes a dataframe with a single column 'Predicted'
+    And returns the list of courses in the following format:
+    [
+        {
+            "Term": 202205,
+            "Subj": "ADMN",
+            "Num": "001",
+            "Section": "W01",
+            "Sched Type": "Lec",
+            "Enrolled": 50,
+        },
+        ...
+    ]
+    '''
 
 def _term_plain_to_code(term):
     if term == 'spring':
