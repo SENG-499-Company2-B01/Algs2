@@ -27,8 +27,11 @@ def predict(request):
     # Reformat schedules for prediction
     historic_schedules = utils.reformat_schedules(historic_schedules)
 
-    # Get courses from backend
-    courses = api.request_courses()
+    # Get courses from request
+    courses = data.get('courses')
+    ## Get courses from backend
+    ## courses = api.request_courses()
+
     courses = utils.filter_courses_by_term(courses, term)
 
     # Reformat courses for prediction
