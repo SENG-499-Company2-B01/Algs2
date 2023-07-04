@@ -15,6 +15,7 @@ jobs:
         python-version: [3.9]
     env:
       BACKEND_URL: ${{ secrets.BACKEND_URL }}
+      BACKEND_TOKEN: ${{ secrets.BACKEND_TOKEN }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       DJANGO_MODE: ${{ secrets.DJANGO_MODE }}
       HOST_IP: ${{ secrets.HOST_IP }}
