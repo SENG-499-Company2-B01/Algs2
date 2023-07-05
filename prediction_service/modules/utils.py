@@ -132,13 +132,13 @@ def reformat_predictions(courses, predictions):
         ...
     ]
     '''
-    predictions = []
+    result = {"estimates": {}}
     for course, prediction in zip(courses, predictions):
-        predictions.append({
+        result["estimates"].append({
             "course": course["Subj"] + course["Num"],
             "estimate": prediction,
         })
-    return predictions
+    return result
         
 
 def _term_plain_to_code(term):
