@@ -32,8 +32,8 @@ def main():
             "building": "", # Building
             "professor": "", # Professor
             "days": [], # Days
-            "num_seats": str(course["MaxEnrollment"]),
-            "enrolled": str(course["Enrolled"]),
+            "num_seats": int(course["MaxEnrollment"]),
+            "enrolled": int(course["Enrolled"]),
             "start_time": "", # Start Time
             "end_time": "", # End Time
         })
