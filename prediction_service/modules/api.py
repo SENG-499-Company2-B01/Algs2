@@ -13,5 +13,5 @@ def request_schedules():
 
 def request_historic_schedules():
     headers = {'apikey': environ['BACKEND_TOKEN']}
-    schedules = requests.get(f'{environ["BACKEND_URL"]}/getSchedule/prev', headers=headers)
+    schedules = requests.get(f'{environ["BACKEND_URL"]}/schedules/prev', headers=headers)
     return schedules
