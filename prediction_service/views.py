@@ -1,6 +1,6 @@
 from .modules import api
 from .modules import utils
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from enrollment_predictions.enrollment_predictions import enrollment_predictions
 import json
 
@@ -43,7 +43,7 @@ def predict(request):
     # Reformate predictions
     predictions = utils.reformat_predictions(courses, predictions)
     
-    return HttpResponse(predictions, status=200) 
+    return JsonResponse(predictions, status=200) 
 
     '''
     # If no schedule is returned, perform simple prediction
