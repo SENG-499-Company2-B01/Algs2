@@ -19,12 +19,16 @@ def most_recent_predict_year(historic_schedules, courses):
     result = {"estimates": {}}
     for ind in courses.index:
         past_offerings = historic_schedules[historic_schedules["Course"] == courses['Course'][ind]]
-        past_offerings = past_offerings[past_offerings["Season"] == courses['Season'][ind]]
-        most_recent_offering = past_offerings[past_offerings["Term"] == past_offerings["Term"].max()].iloc[0]
+        try:
+            past_offerings = past_offerings[past_offerings["Season"] == courses['Season'][ind]]
+            most_recent_offering = past_offerings[past_offerings["Term"] == past_offerings["Term"].max()].iloc[0]
+            estimate = most_recent_offering["Enrolled"]
+        except:
+            estimate = 0
 
         prediction = {
             "course" : courses['Course'][ind],
-            "estimate" : most_recent_offering["Enrolled"]
+            "estimate" : estimate
         }
 
         result["estimates"][courses['Course'][ind]] = prediction
