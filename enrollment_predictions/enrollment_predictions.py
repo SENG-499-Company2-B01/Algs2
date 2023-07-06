@@ -26,17 +26,18 @@ def most_recent_enrollments(historic_schedules, courses):
         past_offerings = past_offerings[past_offerings["Season"] == courses['Season'][ind]]
         most_recent_offering = past_offerings[past_offerings["Term"] == past_offerings["Term"].max()].iloc[0]
 
-        """prediction = {
+        prediction = {
             "course" : courses['Course'][ind],
             "estimate" : most_recent_offering["Enrolled"]
         }
+
+        result["estimates"][courses['Course'][ind]] = prediction
+        """
         predictions.append(prediction)
 
         result["estimates"].append({
             "course": courses['Course'][ind],
             "estimate": most_recent_offering["Enrolled"],
         })"""
-
-        result["estimates"][courses['Course'][ind]] = most_recent_offering["Enrolled"]
 
     return(result)
