@@ -25,28 +25,25 @@ def predict(request):
     """ TODO: Uncomment this when backend is ready
     # Get historic schedules from backend
     historic_schedules = api.request_historic_schedules()
-
-    # Reformat schedules for prediction
-    historic_schedules = utils.reformat_schedules(historic_schedules)
     """ # TODO: Remove this when backend is ready
     with open('data/client_data/schedules.json', 'r', encoding='utf-8') as fh:
         historic_schedules = json.load(fh)
+    # Reformat schedules for prediction
+    historic_schedules = utils.reformat_schedules(historic_schedules)
 
     # Get courses from request
     courses = data.get('courses')
     ## Get courses from backend
     ## courses = api.request_courses()
 
-    try:
-        predictions = most_recent_enrollments(historic_schedules, courses, year, term)
-    except Exception as e:
-        return HttpResponse(f"oop {e}", status=400)
-    """ TODO: Uncomment when decision tree is ready
-    courses = utils.filter_courses_by_term(courses, term)
-
+    # Simple prediction until decision tree is ready
+    predictions = most_recent_enrollments(historic_schedules, courses, year, term)
+    
     # Reformat courses for prediction
+    courses = utils.filter_courses_by_term(courses, term)
     courses = utils.reformat_courses(courses, year, term)
 
+    """ TODO: Uncomment when decision tree is ready
     # Perform prediction
     predictions = enrollment_predictions(historic_schedules, courses)
 
@@ -55,9 +52,9 @@ def predict(request):
     
     try:
         #predictions = json.dumps(predictions, indent=2)
-        return JsonResponse(predictions, safe=False, status=200) 
+        return JsonResponse(predictions, status=200) 
     except:
-        return HttpResponse(f"got this far{predictions}", status=400)
+        return HttpResponse(f"{predictions}", status=400)
 
     '''
     # If no schedule is returned, perform simple prediction
@@ -76,15 +73,12 @@ def predict(request):
     '''
 
 def most_recent_enrollments(historic_schedules, courses, year, term):
-    historic_schedules = utils.reformat_schedules(historic_schedules)
     historic_schedules = pd.DataFrame(historic_schedules)
     historic_schedules['Course'] = historic_schedules['Subj'] + historic_schedules["Num"]
     term_month = historic_schedules['Term'].astype(int) % 100
     season_mapping = {5: 1, 9: 2, 1: 3}
     historic_schedules['Season'] = term_month.map(season_mapping)
 
-    courses = utils.filter_courses_by_term(courses, term)
-    courses = utils.reformat_courses(courses, year, term)
     courses = pd.DataFrame(courses)
     courses['Course'] = courses['Subj'] + courses["Num"]
     term_month = courses['Term'].astype(int) % 100
