@@ -1,6 +1,6 @@
 from .models.auto_regressor_dec_tree import *
 from .models.most_recent_enroll import *
-import pandas as pd
+# import pandas as pd
 
 def enrollment_predictions(train_data, X):
     train_data = data_preprocessing(train_data)
