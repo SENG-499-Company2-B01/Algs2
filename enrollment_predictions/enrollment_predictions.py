@@ -32,12 +32,5 @@ def most_recent_enrollments(historic_schedules, courses):
         }
 
         result["estimates"][courses['Course'][ind]] = prediction
-        """
-        predictions.append(prediction)
-
-        result["estimates"].append({
-            "course": courses['Course'][ind],
-            "estimate": most_recent_offering["Enrolled"],
-        })"""
 
     return(result)

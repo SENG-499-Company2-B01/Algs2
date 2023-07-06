@@ -49,16 +49,13 @@ def predict(request):
     # Reformate predictions
     predictions = utils.reformat_predictions(courses, predictions)"""
 
+    # Use simple prediction until we can use decision tree
+    predictions = most_recent_enrollments(historic_schedules, courses)
+        
     try:
-        predictions = most_recent_enrollments(historic_schedules, courses)
-    except Exception as e:
-        return HttpResponse(f"oop {e}", status=400)
-    
-    try:
-        #predictions = json.dumps(predictions, indent=2)
         return JsonResponse(predictions, status=200) 
     except:
-        return HttpResponse(f"{predictions}", status=400)
+        return HttpResponse(f"{predictions}", status=200)
 
     '''
     # If no schedule is returned, perform simple prediction
@@ -75,29 +72,3 @@ def predict(request):
         # score = perform_decision_tree()
     #TODO: Return predictions to backend (json)
     '''
-
-if __name__ == '__main__':
-    with open('data/client_data/schedules.json', 'r', encoding='utf-8') as fh:
-        historic_schedules = json.load(fh)
-
-    courses = [
-        {
-            "name": "Fundamentals of Programming with Engineering Applications",
-            "shorthand": "CSC115",
-            "prerequisites": [["CSC110"], ["CSC111"]],
-            "corequisites": [[""]],
-            "terms_offered": ["fall", "spring", "summer"]
-        },
-        {
-            "name": "Foundations of Computer Science",
-            "shorthand": "CSC320",
-            "prerequisites": [["CSC225"], ["CSC226"]],
-            "corequisites": [[""]],
-            "terms_offered": ["fall", "spring", "summer"]
-        }
-    ]
-    term = 'fall'
-    year = '2023'
-    
-    predictions = most_recent_enrollments(historic_schedules, courses)
-    print(predictions)
