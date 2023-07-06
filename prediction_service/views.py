@@ -38,10 +38,9 @@ def predict(request):
     ## courses = api.request_courses()
 
     try:
-        predictions = most_recent_enrollments(historic_schedules, courses)
+        predictions = most_recent_enrollments(historic_schedules, courses, year, term)
     except Exception as e:
         return HttpResponse(f"oop {e}", status=400)
-    return HttpResponse("got this far", status=400)
     """ TODO: Uncomment when decision tree is ready
     courses = utils.filter_courses_by_term(courses, term)
 
