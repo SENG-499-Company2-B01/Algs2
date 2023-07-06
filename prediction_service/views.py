@@ -21,6 +21,8 @@ def predict(request):
         return HttpResponse("term is required", status=400)
     if not term in ["fall", "spring", "summer"]:
         return HttpResponse("term must be fall, spring, or summer", status=400)
+    if not courses:
+        return HttpResponse("courses to predict are required", status=400)
 
     """ TODO: Uncomment this when backend is ready
     # Get historic schedules from backend
@@ -53,7 +55,7 @@ def predict(request):
     try:
         predictions = most_recent_enrollments(historic_schedules, courses)
     except Exception as e:
-        return HttpResponse(f"oop{e}", status=400)
+        return HttpResponse(f"Error calculating course predictions {e}", status=400)
         
     try:
         return JsonResponse(predictions, status=200) 
