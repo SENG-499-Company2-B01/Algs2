@@ -57,7 +57,7 @@ def predict(request):
         #predictions = json.dumps(predictions, indent=2)
         return JsonResponse(predictions, safe=False, status=200) 
     except:
-        return HttpResponse("got this far", status=400)
+        return HttpResponse(f"got this far{predictions}", status=400)
 
     '''
     # If no schedule is returned, perform simple prediction
