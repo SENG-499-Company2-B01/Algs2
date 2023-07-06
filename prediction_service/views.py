@@ -36,14 +36,16 @@ def predict(request):
     ## Get courses from backend
     ## courses = api.request_courses()
 
-    # Simple prediction until decision tree is ready
-    predictions = most_recent_enrollments(historic_schedules, courses, year, term)
-    
-    # Reformat courses for prediction
+    try:
+        predictions = most_recent_enrollments(historic_schedules, courses, year, term)
+    except Exception as e:
+        return HttpResponse(f"oop {e}", status=400)
+    """ TODO: Uncomment when decision tree is ready
     courses = utils.filter_courses_by_term(courses, term)
+
+    # Reformat courses for prediction
     courses = utils.reformat_courses(courses, year, term)
 
-    """ TODO: Uncomment when decision tree is ready
     # Perform prediction
     predictions = enrollment_predictions(historic_schedules, courses)
 
@@ -79,6 +81,8 @@ def most_recent_enrollments(historic_schedules, courses, year, term):
     season_mapping = {5: 1, 9: 2, 1: 3}
     historic_schedules['Season'] = term_month.map(season_mapping)
 
+    courses = utils.filter_courses_by_term(courses, term)
+    courses = utils.reformat_courses(courses, year, term)
     courses = pd.DataFrame(courses)
     courses['Course'] = courses['Subj'] + courses["Num"]
     term_month = courses['Term'].astype(int) % 100
