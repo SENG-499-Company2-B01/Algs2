@@ -7,6 +7,8 @@ def most_recent_data_preprocessing(historic_schedules):
     season_mapping = {5: 1, 9: 2, 1: 3}
     historic_schedules['Season'] = term_month.map(season_mapping)
 
+    return(historic_schedules)
+
 def most_recent_predict_year(historic_schedules, courses):
     courses = pd.DataFrame(courses)
     courses['Course'] = courses['Subj'] + courses["Num"]
