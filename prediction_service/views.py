@@ -41,7 +41,6 @@ def predict(request):
         predictions = most_recent_enrollments(historic_schedules, courses, year, term)
     except Exception as e:
         return HttpResponse(f"oop {e}", status=400)
-    return HttpResponse("got this far", status=400)
     """ TODO: Uncomment when decision tree is ready
     courses = utils.filter_courses_by_term(courses, term)
 
@@ -54,7 +53,11 @@ def predict(request):
     # Reformate predictions
     predictions = utils.reformat_predictions(courses, predictions)"""
     
-    return JsonResponse(predictions, status=200) 
+    try:
+        predictions = json.dumps(predictions, indent=2)
+        return JsonResponse(predictions, status=200) 
+    except:
+        return HttpResponse("got this far", status=400)
 
     '''
     # If no schedule is returned, perform simple prediction
