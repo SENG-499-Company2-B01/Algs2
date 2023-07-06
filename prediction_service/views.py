@@ -71,7 +71,7 @@ def predict(request):
     #TODO: Return predictions to backend (json)
     '''
 
-def most_recent_enrollments(historic_schedules, courses):
+def most_recent_enrollments(historic_schedules, courses, year, term):
     historic_schedules = utils.reformat_schedules(historic_schedules)
     historic_schedules = pd.DataFrame(historic_schedules)
     historic_schedules['Course'] = historic_schedules['Subj'] + historic_schedules["Num"]
