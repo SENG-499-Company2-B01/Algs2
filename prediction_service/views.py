@@ -54,8 +54,8 @@ def predict(request):
     predictions = utils.reformat_predictions(courses, predictions)"""
     
     try:
-        predictions = json.dumps(predictions, indent=2)
-        return JsonResponse(predictions, status=200) 
+        #predictions = json.dumps(predictions, indent=2)
+        return JsonResponse(predictions, safe=False, status=200) 
     except:
         return HttpResponse("got this far", status=400)
 
