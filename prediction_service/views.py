@@ -21,8 +21,6 @@ def predict(request):
         return HttpResponse("term is required", status=400)
     if not term in ["fall", "spring", "summer"]:
         return HttpResponse("term must be fall, spring, or summer", status=400)
-    if not courses:
-        return HttpResponse("courses to predict are required", status=400)
 
     """ TODO: Uncomment this when backend is ready
     # Get historic schedules from backend
@@ -37,6 +35,8 @@ def predict(request):
 
     # Get courses from request
     courses = data.get('courses')
+    if not courses:
+        return HttpResponse("courses to predict are required", status=400)
     ## Get courses from backend
     ## courses = api.request_courses()
 
