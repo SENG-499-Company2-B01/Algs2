@@ -37,7 +37,11 @@ def predict(request):
     ## Get courses from backend
     ## courses = api.request_courses()
 
-    predictions = most_recent_enrollments(historic_schedules, courses)
+    try:
+        predictions = most_recent_enrollments(historic_schedules, courses)
+    except Exception as e:
+        return HttpResponse(f"oop {e}", status=400)
+    return HttpResponse("got this far", status=400)
     """ TODO: Uncomment when decision tree is ready
     courses = utils.filter_courses_by_term(courses, term)
 
