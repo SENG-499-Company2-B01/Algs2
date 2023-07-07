@@ -13,8 +13,9 @@ def predict(request):
     # Check that year and term are correctly provided
     body = request.body.decode('utf-8')
     data = json.loads(body)
-    year = data.get('year')
-    term = data.get('term')
+    
+    year = str(data.get('year'))
+    term = utils.reformat_term(data.get('term'))
     if not year:
         return HttpResponse("year is required", status=400)
     if not term:
