@@ -42,6 +42,8 @@ def predict(request):
     ## courses = api.request_courses()
 
     # Reformat courses for prediction
+    for course in courses:
+        course["terms_offered"] = [utils.reformat_term(term) for term in course["terms_offered"]]
     courses = utils.filter_courses_by_term(courses, term)
     courses = utils.reformat_courses(courses, year, term)
 
