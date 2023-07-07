@@ -32,5 +32,6 @@ def most_recent_predict_year(historic_schedules, courses):
         }
 
         result["estimates"][courses['Course'][ind]] = prediction
+        result["estimates"] = list(result["estimates"].values())
     
     return(result)
