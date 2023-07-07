@@ -165,7 +165,7 @@ def _shorthand_to_subj_and_num(shorthand):
     subj = ''
     num = ''
     for char in shorthand:
-        if char.iswhitespace():
+        if char.isspace():
             continue
         elif char.isalpha():
             subj += char
