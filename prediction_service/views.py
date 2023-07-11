@@ -1,8 +1,9 @@
 from .modules import api
 from .modules import utils
 from django.http import HttpResponse, JsonResponse
-from enrollment_predictions.enrollment_predictions import enrollment_predictions
+from enrollment_predictions.enrollment_predictions import enrollment_predictions, most_recent_enrollments
 import json
+import pandas as pd
 
 def predict(request):
     # Check that request is a POST request
@@ -12,8 +13,9 @@ def predict(request):
     # Check that year and term are correctly provided
     body = request.body.decode('utf-8')
     data = json.loads(body)
-    year = data.get('year')
-    term = data.get('term')
+    
+    year = str(data.get('year'))
+    term = utils.reformat_term(data.get('term'))
     if not year:
         return HttpResponse("year is required", status=400)
     if not term:
@@ -24,21 +26,25 @@ def predict(request):
     """ TODO: Uncomment this when backend is ready
     # Get historic schedules from backend
     historic_schedules = api.request_historic_schedules()
-
-    # Reformat schedules for prediction
-    historic_schedules = utils.reformat_schedules(historic_schedules)
     """ # TODO: Remove this when backend is ready
+
     with open('data/client_data/schedules.json', 'r', encoding='utf-8') as fh:
         historic_schedules = json.load(fh)
+    
+    # Reformat schedules for prediction
+    historic_schedules = utils.reformat_schedules(historic_schedules)
 
     # Get courses from request
     courses = data.get('courses')
+    if not courses:
+        return HttpResponse("courses to predict are required", status=400)
     ## Get courses from backend
     ## courses = api.request_courses()
 
-    courses = utils.filter_courses_by_term(courses, term)
-
     # Reformat courses for prediction
+    for course in courses:
+        course["terms_offered"] = [utils.reformat_term(term) for term in course["terms_offered"]]
+    courses = utils.filter_courses_by_term(courses, term)
     courses = utils.reformat_courses(courses, year, term)
 
     # Perform prediction
@@ -46,8 +52,19 @@ def predict(request):
 
     # Reformate predictions
     predictions = utils.reformat_predictions(courses, predictions)
-    
-    return JsonResponse(predictions, status=200) 
+
+    # Use simple prediction until we can use decision tree
+    """
+    try:
+        predictions = most_recent_enrollments(historic_schedules, courses)
+    except Exception as e:
+        return HttpResponse(f"Error calculating course predictions {e}", status=400)
+    """
+        
+    try:
+        return JsonResponse(predictions, status=200) 
+    except:
+        return HttpResponse(f"{predictions}", status=200)
 
     '''
     # If no schedule is returned, perform simple prediction

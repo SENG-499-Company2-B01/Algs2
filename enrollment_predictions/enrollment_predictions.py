@@ -35,6 +35,9 @@ def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.Data
     
     return predictions
 
+#def most_recent_enrollments(historic_schedules, courses):
+#    historic_schedules = most_recent_data_preprocessing(historic_schedules)
+#    result = most_recent_predict_year(historic_schedules, courses)
 
 if __name__ == "__main__":
     print("Running enrollment_predictions.py")

@@ -139,6 +139,16 @@ def reformat_predictions(courses, predictions):
             "estimate": prediction,
         })
     return result
+
+def reformat_term(term):
+    if term == 'F':
+        return 'fall'
+    elif term == 'Sp':
+        return 'spring'
+    elif term == 'Su':
+        return 'summer'
+    else:
+        return term
         
 
 def _term_plain_to_code(term):
@@ -155,7 +165,9 @@ def _shorthand_to_subj_and_num(shorthand):
     subj = ''
     num = ''
     for char in shorthand:
-        if char.isalpha():
+        if char.isspace():
+            continue
+        elif char.isalpha():
             subj += char
         else:
             num += char
