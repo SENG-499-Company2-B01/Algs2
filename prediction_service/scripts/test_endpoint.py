@@ -1,8 +1,14 @@
 import requests
 import json
 
+# Test endpoint locally
 # base_url = 'http://localhost:8001'
-base_url = 'https://algs2.onrender.com'
+
+# Test endpoint from dev deployment
+base_url = 'https://algs2-dev.onrender.com'
+
+# Test endpoint from prod deployment
+# base_url = 'https://algs2.onrender.com'
 
 url = f'{base_url}/predict'
 courses = [
