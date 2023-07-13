@@ -29,13 +29,13 @@ def main():
         
         schedules[year]["terms"][term]["courses"][subj]["sections"].append({
             "num": course["Section"],
-            "building": "", # Building
-            "professor": "", # Professor
-            "days": [], # Days
+            "building": course["building"],
+            "professor": course["professor"],
+            "days": course["days"],
             "num_seats": int(course["MaxEnrollment"]),
             "enrolled": int(course["Enrolled"]),
-            "start_time": "", # Start Time
-            "end_time": "", # End Time
+            "start_time": course["start_time"],
+            "end_time": course["end_time"],
         })
     
     # Change dictionaries to lists
@@ -44,10 +44,10 @@ def main():
             schedules[year]["terms"][term]["courses"] = list(schedules[year]["terms"][term]["courses"].values())
         schedules[year]["terms"] = list(schedules[year]["terms"].values())
     schedules = list(schedules.values())
-
-    json_schedules = json.dumps(schedules)
-    with open('schedules.json', 'w') as f:
-        f.write(json_schedules)
+        
+    json_file = 'schedules.json'
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(schedules, f, ensure_ascii=False, indent=4)
     
 
 def term_code_to_plain(term):
