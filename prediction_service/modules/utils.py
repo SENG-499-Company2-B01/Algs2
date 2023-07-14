@@ -11,9 +11,9 @@ def filter_courses_by_term(courses, term):
         {
             "name": str, // e.g., “Fundamentals of Programming with Engineering Applications”
             "shorthand": str, // e.g., “CSC111”
-            "prerequisites": str[][] // this might have to change…
-            "corequisites": str[] // this might have to change…#
-            “terms_offered”: str[] // “fall”, “winter”, “summer”
+            "prerequisites": str[][]
+            "corequisites": str[][]
+            “terms_offered”: str[] // “fall”, “spring”, “summer”
         },
         ...
     ]

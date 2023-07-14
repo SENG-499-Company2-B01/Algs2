@@ -26,8 +26,8 @@ def predict(request):
     """ TODO: Uncomment this when backend is ready
     # Get historic schedules from backend
     historic_schedules = api.request_historic_schedules()
-    """ # TODO: Remove this when backend is ready
-
+    """
+    # TODO: Remove this when backend is ready
     with open('data/client_data/schedules.json', 'r', encoding='utf-8') as fh:
         historic_schedules = json.load(fh)
     
