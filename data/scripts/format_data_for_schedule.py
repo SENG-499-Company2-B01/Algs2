@@ -1,11 +1,11 @@
-
-# This script is intended to be run in the same directory as the Course_Summary_2008_2022.json file
-
 import json
+import os
 
 def main():
+    current_path = os.path.dirname(__file__)
+    path = os.path.join(current_path, "../client_data/")
     # Load data from json file
-    with open('Course_Summary_2008_2022.json', 'r', encoding='utf-8') as fh:
+    with open(path+'Course_Summary_2008_2022.json', 'r', encoding='utf-8') as fh:
         courses = json.load(fh)
 
 
@@ -45,7 +45,7 @@ def main():
         schedules[year]["terms"] = list(schedules[year]["terms"].values())
     schedules = list(schedules.values())
         
-    json_file = 'schedules.json'
+    json_file = path+'schedules.json'
     with open(json_file, 'w', encoding='utf-8') as f:
         json.dump(schedules, f, ensure_ascii=False, indent=4)
     

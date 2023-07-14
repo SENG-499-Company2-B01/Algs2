@@ -4,7 +4,6 @@ import pandas as pd
 
 current_path = os.path.dirname(__file__)
 path = os.path.join(current_path, "../client_data/")
-# path = current_path+'/'
 
 # To run this, need to put below file in the data/client_data folder
 # File is too big to upload to github

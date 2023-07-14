@@ -1,11 +1,11 @@
-
-# This script is intended to be run in the same directory as the Course_Summary_2008_2022.json file
-
 import json
+import os
 
 def main():
+    current_path = os.path.dirname(__file__)
+    path = os.path.join(current_path, "../client_data/")
     # Load data from json file
-    with open('Course_Summary_2008_2022.json', 'r', encoding='utf-8') as fh:
+    with open(path+'Course_Summary_2008_2022.json', 'r', encoding='utf-8') as fh:
         courses = json.load(fh)
 
     schedules = []
@@ -36,31 +36,31 @@ def main():
         
         classes[year][term][subj].append((
             course["Section"],
-            "", # Building
-            "", # Professor
-            "", # Days
+            course["building"],
+            course["professor"],
+            course["days"],
             str(course["MaxEnrollment"]),
             str(course["Enrolled"]),
-            "", # Start Time
-            "", # End Time
+            course["start_time"],
+            course["end_time"],
         ))
 
         
 
-    with open('schedules.csv', 'w') as f:
+    with open(path+'schedules.csv', 'w') as f:
         f.write("Year,\n")
 
         for year in schedules:
             f.write(f"{year},\n")
 
-    with open('terms.csv', 'w') as f:
+    with open(path+'terms.csv', 'w') as f:
         f.write("Year,Term,\n")
 
         for year, year_terms in terms.items():
             for term in year_terms:
                 f.write(f"{year},{term},\n")
 
-    with open('course_offerings.csv', 'w') as f:
+    with open(path+'course_offerings.csv', 'w') as f:
         f.write("Year,Term,Course,\n")
 
         for year, year_terms in course_offerings.items():
@@ -68,7 +68,7 @@ def main():
                 for subj in subjs:
                     f.write(f"{year},{term},{subj},\n")
 
-    with open('classes.csv', 'w') as f:
+    with open(path+'classes.csv', 'w') as f:
         f.write("Year,Term,Course,Num,Building,Professor,Days,Num_Seats,Enrolled,StartTime,EndTime,\n")
 
         for year, year_terms in classes.items():
