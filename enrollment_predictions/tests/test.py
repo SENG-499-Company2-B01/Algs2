@@ -90,55 +90,79 @@ class AutoRegressorDecTreeTests(unittest.TestCase):
         self.assertTrue(result.equals(expected))
 
     def test_feature_engineering(self):
-        input_data = self.preprocessed_data.head(3).copy()
-        window_sizes = [1, 2]
-        result = feature_engineering(input_data, window_sizes)
-        expected = pd.DataFrame({
+
+        input_data = pd.DataFrame({
             "offering": ["CSC100-2008-fall", "CSC100-2008-summer", "CSC100-2009-fall"],
             "year": [2008, 2008, 2009],
             "term": ["fall", "summer", "fall"],
             "course": ["CSC100", "CSC100", "CSC100"],
             "num_seats": [8, 10, 6],
-            "enrolled": [241, 18, 300],
-            "professor": ["", "", ""],
-            "mean_prev_1": [pd.NA, pd.NA, 241],
-            "median_prev_1": [pd.NA, pd.NA, 241],
-            "min_prev_1": [pd.NA, pd.NA, 241],
-            "max_prev_1": [pd.NA, pd.NA, 241],
-            "std_prev_1": [pd.NA, pd.NA, pd.NA],
-            "ewm_1": [pd.NA, pd.NA, 241],
-            "mean_prev_2": [pd.NA, pd.NA, pd.NA],
-            "median_prev_2": [pd.NA, pd.NA, pd.NA],
-            "min_prev_2": [pd.NA, pd.NA, pd.NA],
-            "max_prev_2": [pd.NA, pd.NA, pd.NA],
-            "std_prev_2": [pd.NA, pd.NA, pd.NA],
-            "ewm_2": [pd.NA, pd.NA, pd.NA]
+            "enrolled": [241, 18, 300]
         })
 
-        result.to_csv("result.csv", index=False)
-        expected.to_csv("expected.csv", index=False)
-        self.preprocessed_data.to_csv("preprocessed.csv", index=False)
-        self.assertTrue(result.equals(expected))
+        window_sizes = [1, 2]
+        result = feature_engineering(input_data, window_sizes)
+        result.to_csv("ttt.csv")
+        expected = pd.DataFrame({
+            'offering': ['CSC100-2008-fall', 'CSC100-2009-fall', 'CSC100-2008-summer'],
+            'year': [2008, 2009, 2008],
+            'term': ['fall', 'fall', 'summer'],
+            'course': ['CSC100', 'CSC100', 'CSC100'],
+            'num_seats': [8, 6, 10],
+            'enrolled': [241, 300, 18],
+            'mean_prev_1': [np.nan, 241, np.nan],
+            'median_prev_1': [np.nan, 241, np.nan],
+            'min_prev_1': [np.nan, 241, np.nan],
+            'max_prev_1': [np.nan, 241, np.nan],
+            'std_prev_1': [np.nan, np.nan, np.nan],
+            'ewm_1': [np.nan, 241, np.nan],
+            'mean_prev_2': [np.nan, np.nan, np.nan],
+            'median_prev_2': [np.nan, np.nan, np.nan],
+            'min_prev_2': [np.nan, np.nan, np.nan],
+            'max_prev_2': [np.nan, np.nan, np.nan],
+            'std_prev_2': [np.nan, np.nan, np.nan],
+            'ewm_2': [np.nan, 241, np.nan]
+
+        })
+
+        self.assertTrue(result.reset_index(drop=True).equals(expected.reset_index(drop=True)))
 
     def test_prepare_data(self):
-        data = self.preprocessed_data.head(3).copy()
-        expected_features = pd.DataFrame({
-            "year": [2021, 2021, 2022],
-            "term": [1, 2, 3],
-            "num_seats": [60, 50, 40],
-            "mean_prev_1": [np.nan, np.nan, 30],
-            "mean_prev_2": [np.nan, np.nan, np.nan],
-            "mean_prev_3": [np.nan, np.nan, np.nan],
-            "mean_prev_6": [np.nan, np.nan, np.nan],
-            "mean_prev_9": [np.nan, np.nan, np.nan]
+        input_data = pd.DataFrame({
+            "offering": ["CSC100-2008-fall", "CSC100-2008-summer", "CSC100-2009-fall"],
+            "year": [2008, 2008, 2009],
+            "term": ["fall", "summer", "fall"],
+            "course": ["CSC100", "CSC100", "CSC100"],
+            "num_seats": [8, 10, 6],
+            "enrolled": [241, 18, 300]
         })
+
+        result, result_target = prepare_data(input_data.copy())
+        result_target.to_csv("ttt.csv")
+        expected = pd.DataFrame({
+            "year": [2008, 2009, 2008],
+            "term": [3, 3, 2],
+            "num_seats": [8, 6, 10],
+            "mean_prev_1": [241, 241, 241],
+            "median_prev_1": [241, 241, 241],
+            "min_prev_1": [241, 241, 241],
+            "max_prev_1": [241, 241, 241],
+            "ewm_1": [241, 241, 241],
+            "ewm_2": [241, 241, 241],
+            "ewm_3": [241, 241, 241],
+            "ewm_6": [241, 241, 241],
+            "ewm_9": [241, 241, 241],
+
+        })
+        expected = expected.astype(float)
+
         expected_target = pd.DataFrame({
-            "enrolled": [30, np.nan, 15],
-            "offering": ["CSC100-2021-Spring", "CSC100-2021-Summer", "CSC100-2022-Fall"]
+            "enrolled": [241, 300, 18],
+            "offering": ["CSC100-2008-fall", "CSC100-2009-fall", "CSC100-2008-summer"]
         })
-        result_features, result_target = prepare_data(data)
-        self.assertTrue(result_features.equals(expected_features))
-        self.assertTrue(result_target.equals(expected_target))
+
+        self.assertTrue(result.reset_index(drop=True).equals(expected.reset_index(drop=True)))
+        self.assertTrue(result_target.reset_index(drop=True).equals(expected_target.reset_index(drop=True)))
 
     def test_calculate_error_metrics(self):
         y_true = [10, 20, 30]
