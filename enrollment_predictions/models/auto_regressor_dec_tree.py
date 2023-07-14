@@ -68,24 +68,49 @@ def data_preprocessing(data):
     return data
 
 
+#def feature_engineering(data, window_sizes):
+#    data = data.copy()
+#    course_groups = data.groupby('offering')
+
+#    for win in window_sizes:
+#        data.loc[:, 'mean_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).mean())
+#        data.loc[:, 'median_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).median())
+#        data.loc[:, 'min_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).min())
+#        data.loc[:, 'max_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).max())
+#        data.loc[:, 'std_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).std())
+#        data.loc[:, 'ewm_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().ewm(span=win).mean())
+
+#    return data
+
 def feature_engineering(data, window_sizes):
     data = data.copy()
-    course_groups = data.groupby('offering')
+    courses = data['course'].unique()
+    terms = data['term'].unique()
 
-    for win in window_sizes:
-        data.loc[:, 'mean_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).mean())
-        data.loc[:, 'median_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).median())
-        data.loc[:, 'min_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).min())
-        data.loc[:, 'max_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).max())
-        data.loc[:, 'std_prev_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().rolling(window=win).std())
-        data.loc[:, 'ewm_{}'.format(win)] = course_groups['enrolled'].transform(lambda x: x.shift().ewm(span=win).mean())
+    all_data = []
 
-    return data
+    for course in courses:
+        for term in terms:
+            course_term_data = data[(data['course'] == course) & (data['term'] == term)].copy()
+
+            for win in window_sizes:
+                course_term_data['mean_prev_{}'.format(win)] = course_term_data['enrolled'].shift(1).rolling(window=win).mean()
+                course_term_data['median_prev_{}'.format(win)] = course_term_data['enrolled'].shift(1).rolling(window=win).median()
+                course_term_data['min_prev_{}'.format(win)] = course_term_data['enrolled'].shift(1).rolling(window=win).min()
+                course_term_data['max_prev_{}'.format(win)] = course_term_data['enrolled'].shift(1).rolling(window=win).max()
+                course_term_data['std_prev_{}'.format(win)] = course_term_data['enrolled'].shift(1).rolling(window=win).std()
+                course_term_data['ewm_{}'.format(win)] = course_term_data['enrolled'].shift(1).ewm(span=win).mean()
+
+            all_data.append(course_term_data)
+
+    return pd.concat(all_data, ignore_index=True)
+
+
 
 
 def prepare_data(data):
     # Apply feature engineering to the train and validation sets separately
-    window_sizes = [1,2, 3, 6, 9]
+    window_sizes = [1, 2, 3, 6, 9]
     #window_sizes = []
     data = feature_engineering(data, window_sizes)
 
