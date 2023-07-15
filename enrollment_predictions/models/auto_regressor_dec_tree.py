@@ -7,6 +7,7 @@ from lightgbm import LGBMRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import r2_score
 # Check if system can import mpatches
 if __name__ == "__main__":
     import matplotlib.patches as mpatches
@@ -132,10 +133,12 @@ def prepare_data(data, first_year, train_end_year, predict_year):
         return None, None, None, None
 
     # Apply feature engineering to the train and validation sets separately
-    # window_sizes = [2, 3, 6, 9]
-    window_sizes = []
-    train_data = feature_engineering(train_data, window_sizes)
-    val_data = feature_engineering(val_data, window_sizes)
+    #window_sizes = [2, 3, 6, 9]
+    
+    # Feature engineering doesn't seem to help
+    #window_sizes = []
+    #train_data = feature_engineering(train_data, window_sizes)
+    #val_data = feature_engineering(val_data, window_sizes)
 
     train_data = remove_unnecessary_columns(train_data)
     val_data = remove_unnecessary_columns(val_data)
@@ -158,11 +161,11 @@ def prepare_data(data, first_year, train_end_year, predict_year):
     X_train_imputed = imp.fit_transform(X_train)
     X_val_imputed = imp.transform(X_val)
 
-    print(X_train_imputed.shape)
-    print(len(X_train.columns))
+    # print(X_train_imputed.shape)
+    # print(len(X_train.columns))
 
-    print(X_val_imputed.shape)
-    print(len(X_val.columns))
+    # print(X_val_imputed.shape)
+    # print(len(X_val.columns))
 
     X_train_imputed = pd.DataFrame(X_train_imputed, columns=X_train.columns)
     train_target = train_data[train_target]
@@ -209,7 +212,9 @@ def model_evaluation(model, X_val, y_val):
     })
     mae = mean_absolute_error(y_val['enrolled'], y_pred)
     rmse = np.sqrt(mean_squared_error(y_val['enrolled'], y_pred))
-    return predictions_df, mae, rmse
+    r2 = r2_score(y_val['enrolled'], y_pred)
+    return predictions_df, mae, rmse, r2
+
 
 
 def plot_results(pred_df, y_val, predict_year):
@@ -245,10 +250,10 @@ def run_prediction_for_year(data, first_year, train_end_year):
         print("Error: The training data is not sorted in chronological order.")
         return None, None, None
 
-
-    # regressor = RandomForestRegressor(n_estimators=13, max_depth=90, min_samples_split=3, min_samples_leaf=1)
+    regressor = RandomForestRegressor(
+        n_estimators=13, max_depth=90, min_samples_split=3, min_samples_leaf=1)
     # regressor = RandomForestRegressor()
-    regressor = GradientBoostingRegressor()
+    # regressor = GradientBoostingRegressor()
     # regressor = LGBMRegressor()
     model = model_training(X_train, y_train, model=regressor)
 
@@ -258,9 +263,9 @@ def run_prediction_for_year(data, first_year, train_end_year):
     if model is None:
         print("Error: Failed during model training.")
         return None, None, None
-    pred_df, mae, rmse = model_evaluation(model, X_val, y_val)
-    print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}')
-    # print(pred_df)
+    
+    pred_df, mae, rmse, r2 = model_evaluation(model, X_val, y_val)
+    print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}, R^2 = {r2}')
 
     return pred_df, y_val, predict_year
 
