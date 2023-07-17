@@ -39,8 +39,6 @@ def flatten_data(data):
                 for section_data in sections:
                     if section_data["num"].startswith('A'):
                         total_enrollment += section_data["enrolled"]
-                    num_seats = section_data["num_seats"]
-                    num = section_data["num"]
 
                 course_enrollments[course] = total_enrollment
 
@@ -49,8 +47,6 @@ def flatten_data(data):
                     "year": year,
                     "term": term,
                     "course": course,
-                    "num_seats": num_seats,
-                    "section": num,
                     "enrolled": enrollment
                 })
 
@@ -59,7 +55,7 @@ def flatten_data(data):
 
 def load_enrollment_data(file_path):
     try:
-        return flatten_data(pd.read_json(file_path))
+        return pd.read_json(file_path)
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")
         return None
@@ -71,15 +67,13 @@ def data_preprocessing(data):
 
     data = data[data['subj'].isin(['SENG', 'CSC', 'ECE'])]
 
-    # Filter subjects not starting with A
-    data = data[data['section'].str.startswith(('A'))]
-
     # Create new features
     season_mapping = {
         'summer': 1,
         'fall': 2,
         'spring': 3
     }
+    
     data['term'] = data['term'].map(season_mapping)
     # Create unique identifier for each course offering
     data['CourseOffering'] = data['course'] + \
@@ -87,40 +81,15 @@ def data_preprocessing(data):
 
     # Map course to numerical values:
     # SENGXXX -> 1XXX, CSCXXX -> 2XXX, ECE -> 3XXX
-    subj_mapping = {'SENG': 1, 'CSC': 2, 'ECE': 3}
+    subj_mapping = {'SENG': 1000, 'CSC': 2000, 'ECE': 3000}
+    
     # Course number is the last 3 digits of the course
-    data['course'] = data['course'].str.extract(r'(\d+)')
-    data['course'] = data['course'].astype(int)
-    data['course'] = data['course'] + data['subj'].map(subj_mapping) * 1000
+    data['course'] = data['course'].str.extract(r'(\d+)').astype(int)
+    data['course'] = data['course'] + data['subj'].map(subj_mapping)
 
     # One-hot encode the categorical features
-    data = pd.get_dummies(data, columns=['subj', 'section'])
+    data = pd.get_dummies(data, columns=['subj'])
 
-    return data
-
-
-def remove_unnecessary_columns(data):
-    # Drop unnecessary columns
-    # data.drop(columns=['subj', 'section'], inplace=True)
-    return data
-
-
-def feature_engineering(data, window_sizes):
-    course_groups = data.groupby('CourseOffering')
-
-    for win in window_sizes:
-        data['mean_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).mean())
-        data['median_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).median())
-        data['min_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).min())
-        data['max_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).max())
-        data['std_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).std())
-        data['ewm_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().ewm(span=win).mean())
     return data
 
 
@@ -135,18 +104,7 @@ def prepare_data(data, first_year, train_end_year, predict_year):
         print(f"Warning: No validation data for year {predict_year}.")
         return None, None, None, None
 
-    # Apply feature engineering to the train and validation sets separately
-    #window_sizes = [2, 3, 6, 9]
-    
-    # Feature engineering doesn't seem to help
-    #window_sizes = []
-    #train_data = feature_engineering(train_data, window_sizes)
-    #val_data = feature_engineering(val_data, window_sizes)
-
-    train_data = remove_unnecessary_columns(train_data)
-    val_data = remove_unnecessary_columns(val_data)
-
-    exclude_columns = ['Year', 'Season', 'Enrolled']
+    exclude_columns = ['enrolled']
 
     train_features = train_data.columns[
         ~train_data.columns.isin(exclude_columns)]
@@ -164,12 +122,6 @@ def prepare_data(data, first_year, train_end_year, predict_year):
     X_train_imputed = imp.fit_transform(X_train)
     X_val_imputed = imp.transform(X_val)
 
-    # print(X_train_imputed.shape)
-    # print(len(X_train.columns))
-
-    # print(X_val_imputed.shape)
-    # print(len(X_val.columns))
-
     X_train_imputed = pd.DataFrame(X_train_imputed, columns=X_train.columns)
     train_target = train_data[train_target]
     X_val_imputed = pd.DataFrame(X_val_imputed, columns=X_val.columns)
@@ -180,9 +132,9 @@ def prepare_data(data, first_year, train_end_year, predict_year):
 
 def model_training_grid_search(X_train, y_train, model):
     param_grid = {
-        'n_estimators': [9, 10, 11, 13, 15],
+        'n_estimators': [11, 13, 15, 18, 20, 25],
         'max_depth': [80, 85, 90, 95, 100],
-        'min_samples_split': [3, 4, 5, 6, 7, 8, 9, 10],
+        'min_samples_split': [1, 2, 3, 4, 5],
         'min_samples_leaf': [1, 2],
     }
     try:
@@ -219,7 +171,6 @@ def model_evaluation(model, X_val, y_val):
     return predictions_df, mae, rmse, r2
 
 
-
 def plot_results(pred_df, y_val, predict_year):
     plt.figure(figsize=(18, 10))
     courses = pred_df['CourseOffering'].unique()
@@ -253,20 +204,11 @@ def run_prediction_for_year(data, first_year, train_end_year):
         print("Error: The training data is not sorted in chronological order.")
         return None, None, None
 
-    regressor = RandomForestRegressor(
-        n_estimators=13, max_depth=90, min_samples_split=3, min_samples_leaf=1)
-    # regressor = RandomForestRegressor()
-    # regressor = GradientBoostingRegressor()
-    # regressor = LGBMRegressor()
-    model = model_training(X_train, y_train, model=regressor)
-
-    # For hyperparameter tuning
-    # model = model_training_grid_search(X_train, y_train, model=regressor)
-
+    model = model_training(X_train, y_train, model=RandomForestRegressor())
     if model is None:
         print("Error: Failed during model training.")
         return None, None, None
-    
+
     pred_df, mae, rmse, r2 = model_evaluation(model, X_val, y_val)
     print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}, R^2 = {r2}')
 
@@ -316,6 +258,10 @@ def main():
     if data is None or data.empty:
         print("Error: Empty data or failed to load data.")
         return
+    data = flatten_data(data)
+    if data is None or data.empty:
+        print("Error flattening data")
+        return
     data = data_preprocessing(data)
     if data is None or data.empty:
         print("Error: Failed during data preprocessing.")
@@ -323,7 +269,7 @@ def main():
 
     first_year = data['year'].min()
     last_year = data['year'].max()
-    for train_end_year in range(first_year, last_year):
+    for train_end_year in range(last_year-1, last_year):
         pred_df, y_val, predict_year = run_prediction_for_year(
             data, first_year, train_end_year)
 
