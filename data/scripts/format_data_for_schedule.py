@@ -28,28 +28,16 @@ def main():
         subj = course["SubjNum"]
         if subj not in schedules[year]["terms"][term]["courses"]:
             schedules[year]["terms"][term]["courses"][subj] = {"course": subj, "sections": []}
-
-        # Ensure start and end times are in HHMM format
-        if (len(course["start_time"]) != 4):
-            print(f'Invalid start time: {course["start_time"]}')
-        if (len(course["end_time"]) != 4):
-            print(f'Invalid end time: {course["end_time"]}')
-        
-        # Reformat start and end times
-        start_time = course["start_time"][:2] + ':' + course["start_time"][2:]
-        end_time = course["end_time"][:2] + ':' + course["end_time"][2:]
-
-        days_formatted = "[" + ", ".join(course["days"]) + "]"
         
         schedules[year]["terms"][term]["courses"][subj]["sections"].append({
             "num": course["Section"],
             "building": course["building"],
             "professor": course["professor"],
-            "days": days_formatted,
+            "days": course["days"],
             "num_seats": int(course["MaxEnrollment"]),
             "num_registered": int(course["Enrolled"]),
-            "start_time": start_time,
-            "end_time": end_time,
+            "start_time": course["start_time"],
+            "end_time": course["end_time"],
         })
     
     # Change dictionaries to lists

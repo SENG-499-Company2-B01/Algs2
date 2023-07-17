@@ -33,16 +33,28 @@ def main():
         if subj not in course_offerings[year][term]:
             course_offerings[year][term].append(subj)
             classes[year][term][subj] = []
+
+        # Reformat start and end times
+        if course["start_time"]:
+            start_time = course["start_time"][:2] + ':' + course["start_time"][2:]
+        else:
+            start_time = ""
+        if course["end_time"]:
+            end_time = course["end_time"][:2] + ':' + course["end_time"][2:]
+        else:
+            end_time = ""
+
+        days_formatted = "[" + ", ".join(course["days"]) + "]"
         
         classes[year][term][subj].append((
             course["Section"],
             course["building"],
             course["professor"],
-            course["days"],
+            days_formatted,
             str(course["MaxEnrollment"]),
             str(course["Enrolled"]),
-            course["start_time"],
-            course["end_time"],
+            start_time,
+            end_time,
         ))
 
         
