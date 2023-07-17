@@ -14,6 +14,8 @@ def main():
     for course in courses:
         if course["Sched Type"] != "LEC":
             continue
+        if course["Num"][0] != "1" and course["Num"][0] != "2" and course["Num"][0] != "3" and course["Num"][0] != "4":
+            continue
 
         year = course["Term"][:4]
         if year not in schedules:
@@ -26,6 +28,16 @@ def main():
         subj = course["SubjNum"]
         if subj not in schedules[year]["terms"][term]["courses"]:
             schedules[year]["terms"][term]["courses"][subj] = {"course": subj, "sections": []}
+
+        # Ensure start and end times are in HHMM format
+        if (len(course["start_time"]) != 4):
+            print(f'Invalid start time: {course["start_time"]}')
+        if (len(course["end_time"]) != 4):
+            print(f'Invalid end time: {course["end_time"]}')
+        
+        # Reformat start and end times
+        course["start_time"] = course["start_time"][:2] + ':' + course["start_time"][2:]
+        course["end_time"] = course["end_time"][:2] + ':' + course["end_time"][2:]
         
         schedules[year]["terms"][term]["courses"][subj]["sections"].append({
             "num": course["Section"],
@@ -33,7 +45,7 @@ def main():
             "professor": course["professor"],
             "days": course["days"],
             "num_seats": int(course["MaxEnrollment"]),
-            "enrolled": int(course["Enrolled"]),
+            "num_registered": int(course["Enrolled"]),
             "start_time": course["start_time"],
             "end_time": course["end_time"],
         })
