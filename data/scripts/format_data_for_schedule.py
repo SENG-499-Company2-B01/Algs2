@@ -36,18 +36,20 @@ def main():
             print(f'Invalid end time: {course["end_time"]}')
         
         # Reformat start and end times
-        course["start_time"] = course["start_time"][:2] + ':' + course["start_time"][2:]
-        course["end_time"] = course["end_time"][:2] + ':' + course["end_time"][2:]
+        start_time = course["start_time"][:2] + ':' + course["start_time"][2:]
+        end_time = course["end_time"][:2] + ':' + course["end_time"][2:]
+
+        days_formatted = "[" + ", ".join(course["days"]) + "]"
         
         schedules[year]["terms"][term]["courses"][subj]["sections"].append({
             "num": course["Section"],
             "building": course["building"],
             "professor": course["professor"],
-            "days": course["days"],
+            "days": days_formatted,
             "num_seats": int(course["MaxEnrollment"]),
             "num_registered": int(course["Enrolled"]),
-            "start_time": course["start_time"],
-            "end_time": course["end_time"],
+            "start_time": start_time,
+            "end_time": end_time,
         })
     
     # Change dictionaries to lists
