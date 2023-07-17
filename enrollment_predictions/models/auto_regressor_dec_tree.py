@@ -1,12 +1,24 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import r2_score
 
 # Regressors
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import r2_score
+
+# Regressors
 from sklearn.ensemble import RandomForestRegressor
+# from lightgbm import LGBMRegressor
+# from sklearn.ensemble import GradientBoostingRegressor
+
+# Plotting
+if __name__ == "__main__":
+    import matplotlib.patches as mpatches
+    import matplotlib.pyplot as plt
 # from lightgbm import LGBMRegressor
 # from sklearn.ensemble import GradientBoostingRegressor
 
@@ -22,18 +34,26 @@ def flatten_data(data):
     Args:
         data (pd.DataFrame): The JSON data
     """
+    """ This function flattens the nested JSON data into a flat dataframe
+
+    Args:
+        data (pd.DataFrame): The JSON data
+    """
     rows = []
     for _, row in data.iterrows():
         year = row["year"]
         terms = row["terms"]
 
+
         for term_data in terms:
             term = term_data["term"]
+
 
             course_enrollments = {}
             for course_data in term_data["courses"]:
                 course = course_data["course"]
                 sections = course_data["sections"]
+
 
                 total_enrollment = 0
                 for section_data in sections:
@@ -42,6 +62,7 @@ def flatten_data(data):
 
                 course_enrollments[course] = total_enrollment
 
+
             for course, enrollment in course_enrollments.items():
                 rows.append({
                     "year": year,
@@ -49,6 +70,7 @@ def flatten_data(data):
                     "course": course,
                     "enrolled": enrollment
                 })
+
 
     return pd.DataFrame(rows)
 
@@ -121,6 +143,7 @@ def prepare_data(data, first_year, train_end_year, predict_year):
     imp = SimpleImputer(keep_empty_features=True)
     X_train_imputed = imp.fit_transform(X_train)
     X_val_imputed = imp.transform(X_val)
+    X_val_imputed = imp.transform(X_val)
 
     X_train_imputed = pd.DataFrame(X_train_imputed, columns=X_train.columns)
     train_target = train_data[train_target]
@@ -143,7 +166,15 @@ def model_training_grid_search(X_train, y_train, model):
 
         best_model = grid_search.best_estimator_
         print("Best Parameters: ", grid_search.best_params_)
+        grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring='neg_mean_absolute_error', verbose=2, n_jobs=-1)
+        grid_search.fit(X_train, y_train['enrolled'])
 
+        best_model = grid_search.best_estimator_
+        print("Best Parameters: ", grid_search.best_params_)
+
+        return best_model
+    except Exception as e:
+        print("Error occurred during model training:", str(e))
         return best_model
     except Exception as e:
         print("Error occurred during model training:", str(e))
@@ -151,8 +182,12 @@ def model_training_grid_search(X_train, y_train, model):
 
 
 def model_training(X_train, y_train, model):
+
+
+def model_training(X_train, y_train, model):
     try:
         model.fit(X_train, y_train['enrolled'])
+        return model
         return model
     except Exception as e:
         print("Error occurred during model training:", str(e))
