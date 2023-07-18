@@ -133,9 +133,9 @@ def reformat_predictions(courses, predictions):
         ...
     ]
     '''
-    result = {"estimates": {}}
+    result = []
     for course, prediction in zip(courses, predictions):
-        result["estimates"].append({
+        result.append({
             "course": course["Subj"] + course["Num"],
             "estimate": prediction,
         })
