@@ -5888,21 +5888,6 @@
     },
     {
         "Term": "200901",
-        "SubjNum": "CSC499",
-        "Subj": "CSC",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "LEC",
-        "Enrolled": 0,
-        "MaxEnrollment": 100,
-        "professor": "Margaret-Anne Storey",
-        "days": [],
-        "start_time": null,
-        "end_time": null,
-        "building": null
-    },
-    {
-        "Term": "200901",
         "SubjNum": "CSC526",
         "Subj": "CSC",
         "Num": "526",
@@ -10786,21 +10771,6 @@
         "building": "Engineering Comp Science Bldg 130"
     },
     {
-        "Term": "200909",
-        "SubjNum": "SENG499",
-        "Subj": "SENG",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "LEC",
-        "Enrolled": 0,
-        "MaxEnrollment": 6,
-        "professor": "Jens Weber",
-        "days": [],
-        "start_time": null,
-        "end_time": null,
-        "building": null
-    },
-    {
         "Term": "201001",
         "SubjNum": "CSC100",
         "Subj": "CSC",
@@ -12608,23 +12578,6 @@
         "start_time": "1430",
         "end_time": "1520",
         "building": "Engineering Comp Science Bldg 104"
-    },
-    {
-        "Term": "201001",
-        "SubjNum": "CSC499",
-        "Subj": "CSC",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "LEC",
-        "Enrolled": 0,
-        "MaxEnrollment": 10,
-        "professor": "Daniel German",
-        "days": [
-            "T"
-        ],
-        "start_time": "1500",
-        "end_time": "1620",
-        "building": "Human &amp; Social Development A270"
     },
     {
         "Term": "201001",
@@ -19349,23 +19302,6 @@
     },
     {
         "Term": "201101",
-        "SubjNum": "CSC499",
-        "Subj": "CSC",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "L01",
-        "Enrolled": 0,
-        "MaxEnrollment": 11,
-        "professor": "Jon Muzio",
-        "days": [
-            "T"
-        ],
-        "start_time": "1500",
-        "end_time": "1620",
-        "building": "David Strong Building C113"
-    },
-    {
-        "Term": "201101",
         "SubjNum": "CSC520",
         "Subj": "CSC",
         "Num": "520",
@@ -25888,38 +25824,6 @@
     },
     {
         "Term": "201201",
-        "SubjNum": "CSC490",
-        "Subj": "CSC",
-        "Num": "490",
-        "Section": "A01",
-        "Sched Type": "LEC",
-        "Enrolled": 2,
-        "MaxEnrollment": 10,
-        "professor": "Bruce Gooch",
-        "days": [],
-        "start_time": null,
-        "end_time": null,
-        "building": null
-    },
-    {
-        "Term": "201201",
-        "SubjNum": "CSC499",
-        "Subj": "CSC",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "L01",
-        "Enrolled": 0,
-        "MaxEnrollment": 10,
-        "professor": "Jon Muzio",
-        "days": [
-            "T"
-        ],
-        "start_time": "1500",
-        "end_time": "1620",
-        "building": "Clearihue Building D130"
-    },
-    {
-        "Term": "201201",
         "SubjNum": "CSC523",
         "Subj": "CSC",
         "Num": "523",
@@ -32160,23 +32064,6 @@
         "start_time": "0930",
         "end_time": "1020",
         "building": "David Strong Building C126"
-    },
-    {
-        "Term": "201301",
-        "SubjNum": "CSC499",
-        "Subj": "CSC",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "L01",
-        "Enrolled": 0,
-        "MaxEnrollment": 15,
-        "professor": "Venkatesh Srinivasan",
-        "days": [
-            "T"
-        ],
-        "start_time": "1500",
-        "end_time": "1620",
-        "building": "Human &amp; Social Development A250"
     },
     {
         "Term": "201301",
@@ -38923,23 +38810,6 @@
         "start_time": "0930",
         "end_time": "1120",
         "building": "Engineering Comp Science Bldg 548"
-    },
-    {
-        "Term": "201401",
-        "SubjNum": "CSC499",
-        "Subj": "CSC",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "L01",
-        "Enrolled": 0,
-        "MaxEnrollment": 15,
-        "professor": "Daniel German",
-        "days": [
-            "T"
-        ],
-        "start_time": "1500",
-        "end_time": "1620",
-        "building": "MacLaurin Building A326"
     },
     {
         "Term": "201401",
@@ -45846,23 +45716,6 @@
     },
     {
         "Term": "201501",
-        "SubjNum": "CSC499",
-        "Subj": "CSC",
-        "Num": "499",
-        "Section": "A01",
-        "Sched Type": "L01",
-        "Enrolled": 0,
-        "MaxEnrollment": 15,
-        "professor": "Sue Whitesides",
-        "days": [
-            "T"
-        ],
-        "start_time": "1500",
-        "end_time": "1620",
-        "building": "David Strong Building C124"
-    },
-    {
-        "Term": "201501",
         "SubjNum": "CSC511",
         "Subj": "CSC",
         "Num": "511",
@@ -49618,36 +49471,6 @@
         "start_time": "1430",
         "end_time": "1550",
         "building": "Clearihue Building A315"
-    },
-    {
-        "Term": "201605",
-        "SubjNum": "CSC490",
-        "Subj": "CSC",
-        "Num": "490",
-        "Section": "A04",
-        "Sched Type": "LEC",
-        "Enrolled": 1,
-        "MaxEnrollment": 1,
-        "professor": "Yvonne Coady",
-        "days": [],
-        "start_time": null,
-        "end_time": null,
-        "building": null
-    },
-    {
-        "Term": "201605",
-        "SubjNum": "CSC490",
-        "Subj": "CSC",
-        "Num": "490",
-        "Section": "A05",
-        "Sched Type": "LEC",
-        "Enrolled": 1,
-        "MaxEnrollment": 1,
-        "professor": "Yvonne Coady",
-        "days": [],
-        "start_time": null,
-        "end_time": null,
-        "building": null
     },
     {
         "Term": "201605",

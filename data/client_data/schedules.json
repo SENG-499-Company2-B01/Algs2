@@ -2522,21 +2522,6 @@
                         ]
                     },
                     {
-                        "course": "CSC499",
-                        "sections": [
-                            {
-                                "num": "A01",
-                                "building": null,
-                                "professor": "Margaret-Anne Storey",
-                                "days": [],
-                                "num_seats": 100,
-                                "enrolled": 0,
-                                "start_time": null,
-                                "end_time": null
-                            }
-                        ]
-                    },
-                    {
                         "course": "CSC526",
                         "sections": [
                             {
@@ -4718,21 +4703,6 @@
                                 "end_time": "1620"
                             }
                         ]
-                    },
-                    {
-                        "course": "SENG499",
-                        "sections": [
-                            {
-                                "num": "A01",
-                                "building": null,
-                                "professor": "Jens Weber",
-                                "days": [],
-                                "num_seats": 6,
-                                "enrolled": 0,
-                                "start_time": null,
-                                "end_time": null
-                            }
-                        ]
                     }
                 ]
             }
@@ -5314,23 +5284,6 @@
                                 "enrolled": 14,
                                 "start_time": "1630",
                                 "end_time": "1750"
-                            }
-                        ]
-                    },
-                    {
-                        "course": "CSC499",
-                        "sections": [
-                            {
-                                "num": "A01",
-                                "building": "Human &amp; Social Development A270",
-                                "professor": "Daniel German",
-                                "days": [
-                                    "T"
-                                ],
-                                "num_seats": 10,
-                                "enrolled": 0,
-                                "start_time": "1500",
-                                "end_time": "1620"
                             }
                         ]
                     },
@@ -10416,21 +10369,6 @@
                                 "enrolled": 7,
                                 "start_time": "1000",
                                 "end_time": "1120"
-                            }
-                        ]
-                    },
-                    {
-                        "course": "CSC490",
-                        "sections": [
-                            {
-                                "num": "A01",
-                                "building": null,
-                                "professor": "Bruce Gooch",
-                                "days": [],
-                                "num_seats": 10,
-                                "enrolled": 2,
-                                "start_time": null,
-                                "end_time": null
                             }
                         ]
                     },
@@ -19159,31 +19097,6 @@
                                 "enrolled": 28,
                                 "start_time": "1130",
                                 "end_time": "1220"
-                            }
-                        ]
-                    },
-                    {
-                        "course": "CSC490",
-                        "sections": [
-                            {
-                                "num": "A04",
-                                "building": null,
-                                "professor": "Yvonne Coady",
-                                "days": [],
-                                "num_seats": 1,
-                                "enrolled": 1,
-                                "start_time": null,
-                                "end_time": null
-                            },
-                            {
-                                "num": "A05",
-                                "building": null,
-                                "professor": "Yvonne Coady",
-                                "days": [],
-                                "num_seats": 1,
-                                "enrolled": 1,
-                                "start_time": null,
-                                "end_time": null
                             }
                         ]
                     },
