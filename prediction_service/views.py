@@ -61,7 +61,7 @@ def predict(request):
         return HttpResponse(f"Error calculating course predictions {e}", status=400)
     
     try:
-        return JsonResponse(predictions, status=200, safe=False) 
+        return JsonResponse(formatted_predictions, status=200, safe=False) 
     except Exception as e:
         return HttpResponse(f"Error with JSON Response: {e} {predictions} {formatted_predictions}", status=200)
 
