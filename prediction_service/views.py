@@ -63,8 +63,8 @@ def predict(request):
         
     try:
         return JsonResponse(predictions, status=200) 
-    except:
-        return HttpResponse(f"{predictions}", status=200)
+    except Exception as e:
+        return HttpResponse(f"Error with JSON Response: {e} {predictions}", status=200)
 
     '''
     # If no schedule is returned, perform simple prediction
