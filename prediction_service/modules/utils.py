@@ -11,9 +11,9 @@ def filter_courses_by_term(courses, term):
         {
             "name": str, // e.g., “Fundamentals of Programming with Engineering Applications”
             "shorthand": str, // e.g., “CSC111”
-            "prerequisites": str[][] // this might have to change…
-            "corequisites": str[] // this might have to change…#
-            “terms_offered”: str[] // “fall”, “winter”, “summer”
+            "prerequisites": str[][]
+            "corequisites": str[][]
+            “terms_offered”: str[] // “fall”, “spring”, “summer”
         },
         ...
     ]
@@ -68,7 +68,7 @@ def reformat_schedules(schedules):
                                 “professor”: “Rich.Little”,
                                 “days”: [“M”, ”R”],
                                 “num_seats”: 120,
-                                "enrolled": 100,
+                                "num_registered": 100,
                                 “start_time”: “08:30”, // 24hr time
                                 “end_time”: “09:50”
                             }
@@ -99,7 +99,7 @@ def reformat_schedules(schedules):
                 subj, num = _shorthand_to_subj_and_num(course["course"])
                 enrolled = 0
                 for section in course["sections"]:
-                    enrolled += section["enrolled"]
+                    enrolled += section["num_registered"]
                 
                 courses.append({
                     "Term": str(schedule["year"]) + _term_plain_to_code(term["term"]),
