@@ -57,6 +57,7 @@ def predict(request):
     
     try:
         predictions = most_recent_enrollments(historic_schedules, courses)
+        predictions = utils.reformat_predictions(courses, predictions)
     except Exception as e:
         return HttpResponse(f"Error calculating course predictions {e}", status=400)
     
