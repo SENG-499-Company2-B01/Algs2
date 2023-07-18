@@ -54,19 +54,16 @@ def predict(request):
     predictions = utils.reformat_predictions(courses, predictions)"""
 
     # Use simple prediction until we can use decision tree
-    
     try:
         predictions = most_recent_enrollments(historic_schedules, courses)
         formatted_predictions = utils.reformat_predictions(courses, predictions)
     except Exception as e:
         return HttpResponse(f"Error calculating course predictions {e}", status=400)
     
-    return HttpResponse(f"{predictions} {formatted_predictions}", status=200)
-
-    """try:
+    try:
         return JsonResponse(predictions, status=200, safe=False) 
     except Exception as e:
-        return HttpResponse(f"Error with JSON Response: {e} {predictions} {formatted_predictions}", status=200)"""
+        return HttpResponse(f"Error with JSON Response: {e} {predictions} {formatted_predictions}", status=200)
 
     '''
     # If no schedule is returned, perform simple prediction
