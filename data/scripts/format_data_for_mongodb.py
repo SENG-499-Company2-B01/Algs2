@@ -47,7 +47,7 @@ def main():
         else:
             end_time = ""
 
-        days_formatted = "[" + ", ".join(course["days"]) + "]"
+        days_formatted = "[" + ",".join(course["days"]) + "]"
         
         classes[year][term][subj].append((
             course["Section"],
