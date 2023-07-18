@@ -98,16 +98,16 @@ def run_prediction_for_year(data, first_year, train_end_year):
         train_end_year,
         predict_year)
 
+    # Handle missing data
+    X_train, y_train = handle_missing_data(train_data)
+    X_val, y_val = handle_missing_data(val_data)
+
     if train_data is None or val_data is None:
         print(f"Skipping year {predict_year} due to lack of validation data.")
         return None, None, None
     if not X_train.index.is_monotonic_increasing:
         print("Error: The training data is not sorted in chronological order.")
         return None, None, None
-
-    # Handle missing data
-    X_train, y_train = handle_missing_data(train_data)
-    X_val, y_val = handle_missing_data(val_data)
 
     model = model_training(X_train, y_train, model=RandomForestRegressor())
     if model is None:
