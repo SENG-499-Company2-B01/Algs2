@@ -124,18 +124,20 @@ def reformat_predictions(courses, predictions):
         },
         ...
     ]
-    And returns the list of courses in the following format:
-    [
-        {
-            "course": "SENG499",
-            "estimate": 80,
-        },
-        ...
-    ]
+    And returns the output structure in the following format:
+    {
+        "estimates" : [
+            {
+                "course": "SENG499",
+                "estimate": 80,
+            },
+            ...
+        ]
+    }
     '''
-    result = []
+    result = {"estimates": []}
     for course, prediction in zip(courses, predictions):
-        result.append({
+        result["estimates"].append({
             "course": course["Subj"] + course["Num"],
             "estimate": prediction,
         })
