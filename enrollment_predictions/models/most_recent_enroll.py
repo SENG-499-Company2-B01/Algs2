@@ -27,6 +27,7 @@ def most_recent_predict_year(historic_schedules, courses):
             estimate = 5
         predictions.append(estimate)
     
-    result = pd.DataFrame(predictions, columns=['Predicted'])
+    # result = pd.DataFrame(predictions, columns=['Predicted'])
     
-    return(result)
+    # return(result)
+    return(predictions)
