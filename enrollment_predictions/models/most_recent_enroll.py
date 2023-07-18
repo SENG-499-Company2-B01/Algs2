@@ -16,7 +16,7 @@ def most_recent_predict_year(historic_schedules, courses):
     season_mapping = {5: 1, 9: 2, 1: 3}
     courses['Season'] = term_month.map(season_mapping)
 
-    result = {"estimates": {}}
+    predictions = []
     for ind in courses.index:
         past_offerings = historic_schedules[historic_schedules["Course"] == courses['Course'][ind]]
         try:
@@ -24,14 +24,10 @@ def most_recent_predict_year(historic_schedules, courses):
             most_recent_offering = past_offerings[past_offerings["Term"] == past_offerings["Term"].max()].iloc[0]
             estimate = most_recent_offering["Enrolled"]
         except:
-            estimate = 0
-
-        prediction = {
-            "course" : courses['Course'][ind],
-            "estimate" : estimate
-        }
-
-        result["estimates"][courses['Course'][ind]] = prediction
-    result["estimates"] = list(result["estimates"].values())
+            estimate = 5
+        predictions.append(int(estimate))
     
-    return(result)
+    # result = pd.DataFrame(predictions, columns=['Predicted'])
+    
+    # return(result)
+    return(predictions)
