@@ -57,15 +57,16 @@ def predict(request):
     
     try:
         predictions = most_recent_enrollments(historic_schedules, courses)
-        predictions = utils.reformat_predictions(courses, predictions)
+        formatted_predictions = utils.reformat_predictions(courses, predictions)
     except Exception as e:
         return HttpResponse(f"Error calculating course predictions {e}", status=400)
     
-        
-    try:
+    return HttpResponse(f"{predictions} {formatted_predictions}", status=200)
+
+    """try:
         return JsonResponse(predictions, status=200, safe=False) 
     except Exception as e:
-        return HttpResponse(f"Error with JSON Response: {e} {predictions}", status=200)
+        return HttpResponse(f"Error with JSON Response: {e} {predictions} {formatted_predictions}", status=200)"""
 
     '''
     # If no schedule is returned, perform simple prediction
