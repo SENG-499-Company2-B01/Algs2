@@ -137,7 +137,7 @@ def reformat_predictions(courses, predictions):
     for course, prediction in zip(courses, predictions):
         result.append({
             "course": course["Subj"] + course["Num"],
-            "estimate": int(prediction),
+            "estimate": prediction,
         })
     return result
 

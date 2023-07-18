@@ -25,7 +25,7 @@ def most_recent_predict_year(historic_schedules, courses):
             estimate = most_recent_offering["Enrolled"]
         except:
             estimate = 5
-        predictions.append(estimate)
+        predictions.append(int(estimate))
     
     # result = pd.DataFrame(predictions, columns=['Predicted'])
     
