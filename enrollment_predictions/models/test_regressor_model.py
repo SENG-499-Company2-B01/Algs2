@@ -1,9 +1,12 @@
 import pandas as pd
-from regressor_model import data_preprocessing 
-from regressor_model import run_prediction_for_year
-if __name__ == "__main__":
-    import matplotlib.patches as mpatches
-    import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+from regressor_model import data_preprocessing
+from regressor_model import model_training
+from regressor_model import model_predict
+from regressor_model import model_evaluation
+from regressor_model import handle_missing_data
 
 
 def flatten_data(data):
@@ -53,13 +56,13 @@ def load_enrollment_data(file_path):
 
 def plot_results(pred_df, y_val, predict_year):
     plt.figure(figsize=(18, 10))
-    courses = pred_df['CourseOffering'].unique()
+    courses = pred_df['offering'].unique()
     for i, course in enumerate(courses):
-        course_df = pred_df[pred_df['CourseOffering'] == course]
-        actual_val = y_val[y_val['CourseOffering'] == course]['enrolled']
+        course_df = pred_df[pred_df['offering'] == course]
+        actual_val = y_val[y_val['offering'] == course]['enrolled']
 
         plt.scatter([course]*len(course_df), actual_val, color='b')
-        plt.scatter([course]*len(course_df), course_df['Predicted'], color='r')
+        plt.scatter([course]*len(course_df), course_df['predicted'], color='r')
 
     plt.xlabel('Course Offering')
     plt.xticks(rotation=90)
@@ -67,13 +70,60 @@ def plot_results(pred_df, y_val, predict_year):
     plt.title(f'Enrollment Prediction for Year {predict_year}')
 
     actual_patch = mpatches.Patch(color='b', label='Actual')
-    predicted_patch = mpatches.Patch(color='r', label='Predicted')
+    predicted_patch = mpatches.Patch(color='r', label='predicted')
     plt.legend(handles=[actual_patch, predicted_patch])
 
     plt.show()
 
 
-def main():
+def split_data(data, first_year, train_end_year, predict_year):
+    # Perform train-test split
+    train_data = data[(
+        data['year'] >= first_year) & (data['year'] <= train_end_year)].copy()
+    val_data = data[data['year'] == predict_year].copy()
+
+    if val_data.empty:
+        raise ValueError(f"No validation data for year {predict_year}.")
+
+    return train_data, val_data
+
+
+def run_prediction_for_year(data, first_year, train_end_year):
+    predict_year = train_end_year + 1
+
+    # Split data into train and validation sets
+    train_data, val_data = split_data(
+        data,
+        first_year,
+        train_end_year,
+        predict_year)
+
+    if train_data is None or val_data is None:
+        print(f"Skipping year {predict_year} due to lack of validation data.")
+        return None, None, None
+    if not X_train.index.is_monotonic_increasing:
+        print("Error: The training data is not sorted in chronological order.")
+        return None, None, None
+
+    # Handle missing data
+    X_train, y_train = handle_missing_data(train_data)
+    X_val, y_val = handle_missing_data(val_data)
+
+    model = model_training(X_train, y_train, model=RandomForestRegressor())
+    if model is None:
+        print("Error: Failed during model training.")
+        return None, None, None
+
+    pred_df = model_predict(model, X_val, y_val['offering'])
+
+    results = model_evaluation(pred_df['predicted'], y_val['enrolled'])
+    # print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}, R^2 = {r2}')
+    print(f'For prediction year {predict_year}: MAE = {results["mae"]}, RMSE = {results["rmse"]}, R^2 = {results["r2"]}')
+
+    return pred_df, y_val, predict_year
+
+
+def main(plot_results=False):
     enrollment_data_path = "./data/client_data/schedules.json"
     data = load_enrollment_data(enrollment_data_path)
     if data is None or data.empty:
@@ -94,9 +144,18 @@ def main():
         pred_df, y_val, predict_year = run_prediction_for_year(
             data, first_year, train_end_year)
 
-        if pred_df is not None:
+        if pred_df is not None and plot_results:
             plot_results(pred_df, y_val, predict_year)
 
 
 if __name__ == "__main__":
-    main()
+    # Take command line input to either plot results or not
+    plot = False
+    # Get command line arguments
+    import sys
+    if len(sys.argv) > 1:
+        # If the first argument is 'plot', then plot the results
+        if sys.argv[1] == 'plot':
+            plot = True
+
+    main(plot)

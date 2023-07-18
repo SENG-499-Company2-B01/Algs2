@@ -1,82 +1,80 @@
 import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 
 
-def data_preprocessing(data):
+def data_preprocessing(data, included_subjects=['SENG', 'CSC', 'ECE']):
+    """
+    Preprocesses the data by filtering, creating unique identifiers, 
+    mapping categorical variables to numerical, and one-hot encoding.
+
+    Args:
+        data (pd.DataFrame): The data to preprocess.
+        included_subjects (list): List of subjects to include in the data.
+
+    Returns:
+        pd.DataFrame: The preprocessed data.
+    """
     # Filter data
     data['subj'] = data['course'].str.extract(r'([a-zA-Z]+)')
+    data = data[data['subj'].isin(included_subjects)]
 
-    data = data[data['subj'].isin(['SENG', 'CSC', 'ECE'])]
-
-    # Create new features
-    season_mapping = {
-        'summer': 1,
-        'fall': 2,
-        'spring': 3
-    }
-
-    data['term'] = data['term'].map(season_mapping)
     # Create unique identifier for each course offering
-    data['CourseOffering'] = data['course'] + \
-        data['year'].astype(str) + "-" + data['term'].astype(str)
+    data['offering'] = data['course'] + data['year'].astype(str) + "-" + data['term'].astype(str)
 
-    # Map course to numerical values:
-    # SENGXXX -> 1XXX, CSCXXX -> 2XXX, ECE -> 3XXX
-    subj_mapping = {'SENG': 1000, 'CSC': 2000, 'ECE': 3000}
-
-    # Course number is the last 3 digits of the course
-    data['course'] = data['course'].str.extract(r'(\d+)').astype(int)
-    data['course'] = data['course'] + data['subj'].map(subj_mapping)
+    # Turn terms into numerical values
+    season_mapping = {'summer': 1, 'fall': 2, 'spring': 3}
+    data['term'] = data['term'].map(season_mapping)
 
     # One-hot encode the categorical features
-    data = pd.get_dummies(data, columns=['subj'])
+    data = pd.get_dummies(data, columns=['subj', 'course'])
 
     return data
 
 
-def prepare_data(data, first_year, train_end_year, predict_year):
-    # Perform train-test split
-    train_data = data[(
-        data['year'] >= first_year) & (data['year'] <= train_end_year)].copy()
+def handle_missing_data(data):
+    """
+    Imputes missing values for all columns except 'enrolled' and 'offering'.
 
-    val_data = data[data['year'] == predict_year].copy()
+    Args:
+        data (pd.DataFrame): The data with missing values.
 
-    if val_data.empty:
-        print(f"Warning: No validation data for year {predict_year}.")
-        return None, None, None, None
+    Returns:
+        tuple (X_imputed, y):
+            X_imputed (pd.DataFrame): The data with imputed missing values.
+            y (pd.DataFrame): The 'enrolled' and 'offering' columns from the original data.
+    """
+    features = data.columns.difference(['enrolled', 'offering'])
 
-    exclude_columns = ['enrolled']
-
-    train_features = train_data.columns[
-        ~train_data.columns.isin(exclude_columns)]
-    train_target = ['enrolled', 'CourseOffering']
-
-    val_features = val_data.columns[~val_data.columns.isin(exclude_columns)]
-    val_target = ['enrolled', 'CourseOffering']
-
-    # Exclude 'CourseOffering' before imputation
-    X_train = train_data[train_features].drop(columns=['CourseOffering'])
-    X_val = val_data[val_features].drop(columns=['CourseOffering'])
+    # Exclude 'offering' before imputation
+    X = data.loc[:, features]
 
     # Impute missing values
-    imp = SimpleImputer(keep_empty_features=True)
-    X_train_imputed = imp.fit_transform(X_train)
-    X_val_imputed = imp.transform(X_val)
+    imp = SimpleImputer()
+    X_imputed = imp.fit_transform(X)
+    X_imputed = pd.DataFrame(X_imputed, columns=X.columns)
 
-    X_train_imputed = pd.DataFrame(X_train_imputed, columns=X_train.columns)
-    train_target = train_data[train_target]
-    X_val_imputed = pd.DataFrame(X_val_imputed, columns=X_val.columns)
-    val_target = val_data[val_target]
+    # Get y (enrolled and offering)
+    y = data[['enrolled', 'offering']]
 
-    return X_train_imputed, train_target, X_val_imputed, val_target
+    return X_imputed, y
 
 
 def model_training(X_train, y_train, model):
+    """
+    Trains the given model with the provided training data.
+
+    Args:
+        X_train (pd.DataFrame): The training data.
+        y_train (pd.DataFrame): The target values for the training data.
+        model (object): The model to train.
+
+    Returns:
+        object: The trained model, or None if an error occurred during training.
+    """
     try:
         model.fit(X_train, y_train['enrolled'])
         return model
@@ -85,35 +83,43 @@ def model_training(X_train, y_train, model):
         return None
 
 
-def model_evaluation(model, X_val, y_val):
-    y_pred = model.predict(X_val)
+def model_predict(model, X_predict, offerings):
+    """
+    Makes predictions using the trained model.
+
+    Args:
+        model (object): The trained model.
+        X_predict (pd.DataFrame): The data to make predictions on.
+        offerings (list): List of course offerings.
+
+    Returns:
+        pd.DataFrame: A dataframe containing the course offerings and the 
+        corresponding predictions.
+    """
+    y_pred = model.predict(X_predict)
+
     predictions_df = pd.DataFrame({
-        'CourseOffering': y_val['CourseOffering'],
-        'Predicted': y_pred
+        'offering': offerings,
+        'predicted': y_pred
     })
-    mae = mean_absolute_error(y_val['enrolled'], y_pred)
-    rmse = np.sqrt(mean_squared_error(y_val['enrolled'], y_pred))
-    r2 = r2_score(y_val['enrolled'], y_pred)
-    return predictions_df, mae, rmse, r2
+
+    return predictions_df
 
 
-def run_prediction_for_year(data, first_year, train_end_year):
-    predict_year = train_end_year + 1
-    X_train, y_train, X_val, y_val = \
-        prepare_data(data, first_year, train_end_year, predict_year)
-    if X_train is None or X_val is None:
-        print(f"Skipping year {predict_year} due to lack of validation data.")
-        return None, None, None
-    if not X_train.index.is_monotonic_increasing:
-        print("Error: The training data is not sorted in chronological order.")
-        return None, None, None
+def model_evaluation(y_true, y_pred):
+    """
+    Evaluates the model's performance using Mean Absolute Error (MAE), 
+    Root Mean Squared Error (RMSE), and R2 score.
 
-    model = model_training(X_train, y_train, model=RandomForestRegressor())
-    if model is None:
-        print("Error: Failed during model training.")
-        return None, None, None
+    Args:
+        y_true (array-like): The true target values.
+        y_pred (array-like): The predicted target values.
 
-    pred_df, mae, rmse, r2 = model_evaluation(model, X_val, y_val)
-    print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}, R^2 = {r2}')
-
-    return pred_df, y_val, predict_year
+    Returns:
+        dict: A dictionary containing the MAE, RMSE, and R2 score.
+    """
+    return {
+        'mae': mean_absolute_error(y_true, y_pred),
+        'rmse': np.sqrt(mean_squared_error(y_true, y_pred)),
+        'r2': r2_score(y_true, y_pred)
+    }

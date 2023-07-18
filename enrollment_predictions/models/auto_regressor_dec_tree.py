@@ -149,7 +149,7 @@ def model_training_grid_search(X_train, y_train, model):
         return best_model
 
 
-def model_training(X_train, y_train, model):
+def model_training(X_train, y_train, model=RandomForestRegressor()):
     try:
         model.fit(X_train, y_train['enrolled'])
         return model
