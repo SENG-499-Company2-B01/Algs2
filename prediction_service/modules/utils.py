@@ -99,7 +99,8 @@ def reformat_schedules(schedules):
                 subj, num = _shorthand_to_subj_and_num(course["course"])
                 enrolled = 0
                 for section in course["sections"]:
-                    enrolled += section["num_registered"]
+                    # enrolled += section["num_registered"]
+                    enrolled += section["enrolled"]
                 
                 courses.append({
                     "Term": str(schedule["year"]) + _term_plain_to_code(term["term"]),
