@@ -2,6 +2,7 @@ import pandas as pd
 from .models.auto_regressor_dec_tree import data_preprocessing
 from .models.auto_regressor_dec_tree import run_prediction_for_year
 from .models.auto_regressor_dec_tree import load_enrollment_data
+from .models.most_recent_enroll import most_recent_data_preprocessing, most_recent_predict_year
 
 def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.DataFrame:
     """_summary_
@@ -40,9 +41,9 @@ def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.Data
 
     return predictions
 
-#def most_recent_enrollments(historic_schedules, courses):
-#    historic_schedules = most_recent_data_preprocessing(historic_schedules)
-#    result = most_recent_predict_year(historic_schedules, courses)
+def most_recent_enrollments(historic_schedules, courses):
+    historic_schedules = most_recent_data_preprocessing(historic_schedules)
+    result = most_recent_predict_year(historic_schedules, courses)
 
 if __name__ == "__main__":
     print("Running enrollment_predictions.py")
