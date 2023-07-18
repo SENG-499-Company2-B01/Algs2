@@ -1,7 +1,7 @@
 from .modules import api
 from .modules import utils
 from django.http import HttpResponse, JsonResponse
-from enrollment_predictions.enrollment_predictions import enrollment_predictions, most_recent_enrollments
+from enrollment_predictions.enrollment_predictions import enrollment_predictions
 import json
 import pandas as pd
 
