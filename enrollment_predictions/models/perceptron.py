@@ -4,6 +4,7 @@ import json
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LinearRegression
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 
@@ -43,9 +44,9 @@ def predict(year, term, all_courses, schedules):
                         found = True
                         break
             if not found:
-                print(f"No data found for {course['shorthand']} in {term}")
+                #print(f"No data found for {course['shorthand']} in {term}")
+                continue
             continue
-
         # Train model
         df = pd.DataFrame(training_data)
         X = df.drop('target', axis=1)
@@ -59,75 +60,75 @@ def predict(year, term, all_courses, schedules):
         model = Sequential()
         model.add(Dense(1))
         model.compile(optimizer='adam', loss='mse')
+        model.fit(X, y, epochs=1000, verbose=0)
         '''
+        # Random forest
         model = RandomForestRegressor(
-            n_estimators=13, max_depth=10, min_samples_split=2, min_samples_leaf=1)
-        
-
+            n_estimators=50, max_depth=1, min_samples_split=2, min_samples_leaf=1)
+        model.fit(X, y)
+        '''
+        # Linear Regression
+        model = LinearRegression()
+        model.fit(X, y)
+        '''
         target_df = pd.DataFrame([target])
         #target_df = imputer.transform(target_df)
 
-        model.fit(X, y)
         predict = model.predict(target_df)
-        print(course["shorthand"], predict)
-
-
+        predictions.append({
+                            "course": course["shorthand"],
+                            "estimate": int(predict[0])
+                        })
+    return predictions
 
 def formatData(course, year, term, formatted_schedules, features):
-    min_year = getMinYear(formatted_schedules)
-    prev_terms = getPrevYearTerms(term)
+    min_year = min(formatted_schedules.keys())
+    max_year = max(formatted_schedules.keys())
     all_data = {}
-    for year in formatted_schedules:
-        if year == min_year:
+    prev_year = {feature: 0 for feature in features}
+    for schedule_year in formatted_schedules:
+        if schedule_year == min_year:
             continue
         year_data = {}
         for feature in features:
-            term = feature.split("_")[1]
+            feature_term = feature.split("_")[1]
             try:
-                if term in prev_terms:
-                    year_data[feature] = formatted_schedules[year-1][term][feature.split("_")[0]]
-                else:
-                    year_data[feature] = formatted_schedules[year][term][feature.split("_")[0]]
+                year_data[feature] = formatted_schedules[schedule_year-1][feature_term][feature.split("_")[0]]
+                prev_year[feature] = year_data[feature]
             except KeyError as e:
-                year_data[feature] = 0
+                year_data[feature] = prev_year[feature]
                 continue
         if sum([1 for item in year_data.values() if item != 0]) == 0:
+            # print(f"No data found for {course['shorthand']} in {schedule_year}")
             # Skip this year if no data points are found
             continue
         try:
-            year_data["target"] = formatted_schedules[year][term][course["shorthand"]]
-        except KeyError:
-            # Skip this year if target is not found making this data point useless
-            continue
-        all_data[year] = year_data
-    # Remove 
+            year_data["target"] = formatted_schedules[schedule_year][term][course["shorthand"]]
+        except KeyError as e:
+            if schedule_year != year and schedule_year != max_year:
+                # print(f"Target not found for {course['shorthand']} in {schedule_year}")
+                # Skip this year if target is not found making this data point useless
+                # Not skipped if year is max_year because we want to predict this year
+                continue
+        all_data[schedule_year] = year_data
+    # Remove courses with not enough data
     if len(all_data) < 2:
+        # print(f"Not enough data points for {course['shorthand']}")
         raise NoDataError("Not enough data points to train model")
+    # Recalculate max_year
     max_year = max(all_data.keys())
     target = all_data.pop(max_year)
-    target.pop("target")
+    try:
+        target.pop("target")
+    except KeyError:
+        pass
     all_data = list(all_data.values())
     return (all_data, target)
-
-
-def getMinYear(formatted_schedules):
-    min_year = 9999
-    for year in formatted_schedules:
-        if year < min_year:
-            min_year = year
-    return min_year
-
-def getPrevYearTerms(term):
-    if term == "fall":
-        return ["fall", "summer", "spring"]
-    elif term == "summer":
-        return ["summer", "spring"]
-    else:
-        return ["spring"]
         
 def getFeatures(course, all_courses):
     # Get list of features inlcuding the course itself, all courses in prev term and all prereqs
     feature_courses = findPrevTermCourses(course["shorthand"])
+    feature_courses = []
     feature_courses.append(course["shorthand"])
     for prereq_group in course["prerequisites"]:
         for prereq in prereq_group:
@@ -284,7 +285,26 @@ def main():
         schedules = json.load(fh)
     with open('./data/client_data/courses.json', 'r', encoding='utf-8') as fh:
         all_courses = json.load(fh)
-    predict(2019, "spring", all_courses, schedules)
+
+    for predict_year in range(2012, 2024): 
+        sqaured_error = 0
+        count = 0
+        for term in ["spring", "summer", "fall"]:
+            formatted_schedules = reformat_schedules(schedules, predict_year, term)
+            predictions = predict(predict_year, term, all_courses, schedules)
+            for prediction in predictions:
+                course = prediction["course"]
+                estimate = prediction["estimate"]
+                try:
+                    actual = formatted_schedules[predict_year][term][course]
+                except KeyError as e:
+                    continue
+                sqaured_error += (estimate - actual)**2
+                count += 1
+        if count == 0:
+            continue
+        rmse = (sqaured_error/count)**0.5
+        print(f"{predict_year} - RMSE {rmse}")
 
 if __name__ == "__main__":
     main()
