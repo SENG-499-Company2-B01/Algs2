@@ -33,7 +33,7 @@ def main():
             "professor": course["professor"],
             "days": course["days"],
             "num_seats": int(course["MaxEnrollment"]),
-            "enrolled": int(course["Enrolled"]),
+            "num_registered": int(course["Enrolled"]),
             "start_time": course["start_time"],
             "end_time": course["end_time"],
         })
