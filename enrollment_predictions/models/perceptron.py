@@ -37,10 +37,12 @@ def predict(year, term, all_courses, schedules):
             for descensing_year in descensing_years:
                 if term in formatted_schedules[descensing_year]:
                     if course["shorthand"] in formatted_schedules[descensing_year][term]:
+                        '''
                         predictions.append({
                             "course": course["shorthand"],
                             "estimate": formatted_schedules[descensing_year][term][course["shorthand"]]
                         })
+                        '''
                         found = True
                         break
             if not found:
@@ -64,7 +66,7 @@ def predict(year, term, all_courses, schedules):
         '''
         # Random forest
         model = RandomForestRegressor(
-            n_estimators=50, max_depth=1, min_samples_split=2, min_samples_leaf=1)
+            n_estimators=50, max_depth=3, min_samples_split=2, min_samples_leaf=1)
         model.fit(X, y)
         '''
         # Linear Regression
@@ -129,6 +131,7 @@ def getFeatures(course, all_courses):
     # Get list of features inlcuding the course itself, all courses in prev term and all prereqs
     feature_courses = findPrevTermCourses(course["shorthand"])
     feature_courses = []
+    
     feature_courses.append(course["shorthand"])
     for prereq_group in course["prerequisites"]:
         for prereq in prereq_group:
@@ -286,10 +289,13 @@ def main():
     with open('./data/client_data/courses.json', 'r', encoding='utf-8') as fh:
         all_courses = json.load(fh)
 
+    courses_squared_error = {}
     for predict_year in range(2012, 2024): 
         sqaured_error = 0
         count = 0
         for term in ["spring", "summer", "fall"]:
+            print(predict_year, term)
+            print("====================================")
             formatted_schedules = reformat_schedules(schedules, predict_year, term)
             predictions = predict(predict_year, term, all_courses, schedules)
             for prediction in predictions:
@@ -301,10 +307,19 @@ def main():
                     continue
                 sqaured_error += (estimate - actual)**2
                 count += 1
+                try:
+                    courses_squared_error[course+" "+term]["total"] += (estimate - actual)**2
+                    courses_squared_error[course+" "+term]["count"] += 1
+                except KeyError as e:
+                    courses_squared_error[course+" "+term] = {"total": (estimate - actual)**2, "count": 1}
+                print(course, term, estimate, actual)
         if count == 0:
             continue
         rmse = (sqaured_error/count)**0.5
         print(f"{predict_year} - RMSE {rmse}")
+    for course, val in courses_squared_error.items():
+        rmse = (val["total"]/val["count"])**0.5
+        print(f"{course} - RMSE {rmse}")
 
 if __name__ == "__main__":
     main()
