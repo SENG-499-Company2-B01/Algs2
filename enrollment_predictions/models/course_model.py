@@ -25,6 +25,8 @@ target = []
 model = None
 model_path = "data/model_data/"
 
+# Functions to get variables
+
 def get_data():
     return data
 
@@ -58,10 +60,12 @@ def getRSME(predictions):
 def getErrors(predictions):
     return abs(predictions - y_valid.values)
 
+# Concatenate new data to the global DataFrame 'data'
 def add_data(new_data):
     global data
     data = pd.concat([data, new_data])
 
+# (data preprocessing steps, cleaning, and feature engineering)
 def format_data(data):
     data = data[data['Subj'].isin(['SENG', 'CSC', 'ECE'])]
     data = data[data['Sched Type'].isin(['LEC'])]
@@ -81,13 +85,15 @@ def format_data(data):
 
     return data
 
-# Change to get data from backend
+
+# Import data from files and apply data formatting
 def import_data():
     data_19_21 = pd.read_json('data/client_data/Course_Summary_2019_2021.json')
     data_22_23 = pd.read_json('data/client_data/Course_Summary_2022_2023.json')
     add_data(format_data(data_19_21))
     add_data(format_data(data_22_23))
 
+# Get the training and validation data from 'data'
 def get_training_data():
     global X_train, X_valid, y_train, y_valid
 
@@ -102,6 +108,9 @@ def get_training_data():
 
     X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, random_state=42)
 
+
+# Define categorical, numerical features, and target column
+# sets 'cat_features', 'num_features', and 'target'
 def generate_features():
     global cat_features, num_features, target
 
@@ -111,6 +120,10 @@ def generate_features():
 
     save_all_features()
 
+
+# Change categorical, numerical features, or target column
+# updates corresponding global variables
+# updates JSON files to save the changes
 def change_features(type, features):
     global cat_features, num_features, target
 
@@ -127,6 +140,8 @@ def change_features(type, features):
         with open('data/model_data/target.json', 'w') as f:
             json.dump(target, f)
 
+# Import categorical, numerical features, and target column from JSON files
+# sets 'cat_features', 'num_features', and 'target'
 def import_features():
     global cat_features, num_features, target
 
@@ -140,6 +155,7 @@ def import_features():
         with open('data/model_data/target.json') as f:
             target = json.load(f)
 
+# Save categorical, numerical features, and target column to JSON files
 def save_all_features():
     with open('data/model_data/cat_features.json', 'w') as f:
         json.dump(cat_features, f)
@@ -148,6 +164,7 @@ def save_all_features():
     with open('data/model_data/target.json', 'w') as f:
         json.dump(target, f)
 
+# Create a data preprocessing pipeline using ColumnTransformer and Pipelines
 def create_pipeline(cat_features, num_features):
     cat_pipeline = Pipeline([
         ("Imputer", SimpleImputer(strategy="most_frequent")),
@@ -166,6 +183,7 @@ def create_pipeline(cat_features, num_features):
 
     return preprocessing
 
+# Train a regression model with specified model type (decision_tree, random_forest, linear_regression)
 def train_model(model_type):
     global model
     if X_train is None or X_valid is None or y_train is None or y_valid is None:
@@ -199,6 +217,7 @@ def train_model(model_type):
     model.fit(X_train, y_train)
     joblib.dump(model, model_path+model_type+".pkl")
 
+# Load the pre-trained model from file or train a new one if needed
 def import_model(model_type, auto_retrain_model=False):
     global model
 
@@ -209,6 +228,7 @@ def import_model(model_type, auto_retrain_model=False):
     else:
         model = joblib.load(temp_model_path)
 
+# Predict using the trained model
 def predict(X, model_type):
     if model_type == "most_recent":
         return predict_most_recent(X)
@@ -217,6 +237,8 @@ def predict(X, model_type):
 
     return model.predict(X).clip(min=0)
 
+# Predict using the most recent enrollment data of the course
+# calculates predictions using the most recent enrollment data from 'X_train' and 'y_train'
 def predict_most_recent(X):
     global X_train, y_train
 
@@ -234,6 +256,7 @@ def predict_most_recent(X):
 
     return predictions
 
+# Train and predict using the specified model type
 def perform_model(model_type):
 
     train_model(model_type)

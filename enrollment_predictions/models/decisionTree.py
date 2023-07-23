@@ -1,3 +1,5 @@
+# Made redundant by course_model.py
+
 import pandas as pd
 from sklearn import tree
 from sklearn.model_selection import train_test_split
