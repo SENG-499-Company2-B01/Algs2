@@ -22,39 +22,44 @@ This repository contains a simple Django webserver that runs inside a Docker con
 
 ## Documentation
 
-The server exposes two endpoints: `/notify` and `/generate`. By default, the django server runs on port 8000,
+The server exposes a single endpoint: `/predict`. By default, the django server runs on port 8000,
 but for compatibility with the rest of the scheduler, the docker container exposes port 8001.
 
-### `/notify`
 
-	http://localhost:8001/notify
-
-This endpoint is used to notify the server that new historic data is available. It takes no parameters.
-When receiving a request on this endpoint the server will fetch the new data from the backend and retrain
-all of its models on the new data.
-
-### `/generate`
+### `/predict`
 	
-	http://localhost:8001/generate
+	http://localhost:8001/predict
 
 This endpoint is used to make predictions about future enrollment. It takes the following parameters:
 
- - `year`: string, the year for which to make predictions
- - `term`: string, the term for which to make predictions
- - `scheuduleid`: string, the id of the schedule for which to make predictions
+ - `year`: int, the year for which to make predictions
+ - `term`: string, the term for which to make predictions ('fall', 'spring', 'summer')
+ - `courses`: Course[], A list of courses that will be included in the results
+
+ Course has the following structure:
+
+```python
+{
+	"course": string,
+	"name": string,
+	"prerequisites": string[][],
+	"corequisites": string[][],
+	"terms_offered": string[]
+}
+```
 
 The server will return a JSON object with the following structure:
 
-```json
-	{
-		"estimates": [
-			{
-				"course": string,
-				"estimate": int
-			},
-			...
-		]
-	}
+```python
+{
+	"estimates": [
+		{
+			"course": string,
+			"estimate": int
+		},
+		...
+	]
+}
 ```
 
 ### Data
@@ -63,6 +68,7 @@ The repository contains a directory `data/` that contains two subdirectories:
 
 - `client_data/`: contains local copies of data that is used for testing purposes
 - `model_data/`: contains temporary data that is used by the models
+- `scripts/` : contains scripts that were used to transalte between data formats
 
 ### Enrollment Predictions
 

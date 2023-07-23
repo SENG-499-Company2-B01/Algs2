@@ -44,6 +44,7 @@ def predict(request):
     # Reformat courses for prediction
     for course in courses:
         course["terms_offered"] = [utils.reformat_term(term) for term in course["terms_offered"]]
+    courses = utils.fix_course_and_shorthand(courses)
     courses = utils.filter_courses_by_term(courses, term)
     courses = utils.reformat_courses(courses, year, term)
 
