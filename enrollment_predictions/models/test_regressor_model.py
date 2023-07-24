@@ -63,7 +63,6 @@ def plot_results(pred_df, y_val, predict_year):
 
         plt.scatter([course]*len(course_df), actual_val, color='b')
         plt.scatter([course]*len(course_df), course_df['predicted'], color='r')
-
     plt.xlabel('Course Offering')
     plt.xticks(rotation=90)
     plt.ylabel('Enrollment Prediction')
@@ -109,7 +108,9 @@ def run_prediction_for_year(data, first_year, train_end_year):
         print("Error: The training data is not sorted in chronological order.")
         return None, None, None
 
-    model = model_training(X_train, y_train, model=RandomForestRegressor())
+    # regressor gradiant booster
+    regressor = RandomForestRegressor()
+    model = model_training(X_train, y_train, model=regressor)
     if model is None:
         print("Error: Failed during model training.")
         return None, None, None
@@ -123,7 +124,8 @@ def run_prediction_for_year(data, first_year, train_end_year):
     return pred_df, y_val, predict_year
 
 
-def main(plot_results=False):
+
+def main(plot=False):
     enrollment_data_path = "./data/client_data/schedules.json"
     data = load_enrollment_data(enrollment_data_path)
     if data is None or data.empty:
@@ -144,18 +146,18 @@ def main(plot_results=False):
         pred_df, y_val, predict_year = run_prediction_for_year(
             data, first_year, train_end_year)
 
-        if pred_df is not None and plot_results:
+        if pred_df is not None and plot:
             plot_results(pred_df, y_val, predict_year)
 
 
 if __name__ == "__main__":
     # Take command line input to either plot results or not
-    plot = False
+    plot_results = False
     # Get command line arguments
     import sys
     if len(sys.argv) > 1:
         # If the first argument is 'plot', then plot the results
         if sys.argv[1] == 'plot':
-            plot = True
+            plot_results = True
 
-    main(plot)
+    main(plot_results)

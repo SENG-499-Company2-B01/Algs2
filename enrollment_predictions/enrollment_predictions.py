@@ -1,8 +1,8 @@
 import pandas as pd
 from .models.regressor_model import data_preprocessing
-from .models.auto_regressor_dec_tree import handle_missing_data
-from .models.auto_regressor_dec_tree import model_training
-from .models.auto_regressor_dec_tree import model_predict
+from .models.regressor_model import handle_missing_data
+from .models.regressor_model import model_training
+from .models.regressor_model import model_predict
 
 
 def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.DataFrame:

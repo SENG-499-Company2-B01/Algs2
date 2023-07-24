@@ -52,8 +52,8 @@ def handle_missing_data(data):
     # Exclude 'offering' before imputation
     X = data.loc[:, features]
 
-    # Impute missing values
-    imp = SimpleImputer()
+    # Impute missing values using previous year's data
+    imp = SimpleImputer(strategy='mean')
     X_imputed = imp.fit_transform(X)
     X_imputed = pd.DataFrame(X_imputed, columns=X.columns)
 
