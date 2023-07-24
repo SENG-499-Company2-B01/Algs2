@@ -242,7 +242,7 @@ def reformat_schedules(schedules, year, term):
                                 “professor”: “Rich.Little”,
                                 “days”: [“M”, ”R”],
                                 “num_seats”: 120,
-                                "num_registered": 100,
+                                "enrolled": 100,
                                 “start_time”: “08:30”, // 24hr time
                                 “end_time”: “09:50”
                             }
@@ -277,7 +277,7 @@ def reformat_schedules(schedules, year, term):
             for course in term["courses"]:
                 enrolled = 0
                 for section in course["sections"]:
-                    enrolled += section["num_registered"]
+                    enrolled += section["enrolled"]
                 years[schedule["year"]][term["term"]][course["course"]] = enrolled
     return years
 
