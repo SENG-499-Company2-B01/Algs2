@@ -99,7 +99,8 @@ def reformat_schedules(schedules):
                 subj, num = _shorthand_to_subj_and_num(course["course"])
                 enrolled = 0
                 for section in course["sections"]:
-                    enrolled += section["num_registered"]
+                    # enrolled += section["num_registered"]
+                    enrolled += section["enrolled"]
                 
                 courses.append({
                     "Term": str(schedule["year"]) + _term_plain_to_code(term["term"]),
@@ -123,16 +124,18 @@ def reformat_predictions(courses, predictions):
         },
         ...
     ]
-    And returns the list of courses in the following format:
-    [
-        {
-            "course": "SENG499",
-            "estimate": 80,
-        },
-        ...
-    ]
+    And returns the output structure in the following format:
+    {
+        "estimates" : [
+            {
+                "course": "SENG499",
+                "estimate": 80,
+            },
+            ...
+        ]
+    }
     '''
-    result = {"estimates": {}}
+    result = {"estimates": []}
     for course, prediction in zip(courses, predictions):
         result["estimates"].append({
             "course": course["Subj"] + course["Num"],

@@ -1,7 +1,7 @@
 from .modules import api
 from .modules import utils
 from django.http import HttpResponse, JsonResponse
-from enrollment_predictions.enrollment_predictions import enrollment_predictions
+from enrollment_predictions.enrollment_predictions import enrollment_predictions, most_recent_enrollments
 import json
 import pandas as pd
 
@@ -47,24 +47,23 @@ def predict(request):
     courses = utils.filter_courses_by_term(courses, term)
     courses = utils.reformat_courses(courses, year, term)
 
-    # Perform prediction
+    """# Perform prediction
     predictions = enrollment_predictions(historic_schedules, courses)
 
     # Reformate predictions
-    predictions = utils.reformat_predictions(courses, predictions)
+    predictions = utils.reformat_predictions(courses, predictions)"""
 
     # Use simple prediction until we can use decision tree
-    """
     try:
         predictions = most_recent_enrollments(historic_schedules, courses)
+        formatted_predictions = utils.reformat_predictions(courses, predictions)
     except Exception as e:
         return HttpResponse(f"Error calculating course predictions {e}", status=400)
-    """
-        
+    
     try:
-        return JsonResponse(predictions, status=200) 
-    except:
-        return HttpResponse(f"{predictions}", status=200)
+        return JsonResponse(formatted_predictions, status=200, safe=False) 
+    except Exception as e:
+        return HttpResponse(f"Error with JSON Response: {e} {predictions} {formatted_predictions}", status=200)
 
     '''
     # If no schedule is returned, perform simple prediction
