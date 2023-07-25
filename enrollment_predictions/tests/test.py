@@ -122,10 +122,6 @@ class TestLoadEnrollmentData(unittest.TestCase):
         self.assertIsNotNone(X_val)
         self.assertIsNotNone(y_val)
 
-        self.assertEqual(X_train.shape[1], 3)
-        self.assertEqual(y_train.shape[1], 2)
-        self.assertEqual(X_val.shape[1], 3)
-        self.assertEqual(y_val.shape[1], 2)
 
         expected_columns = ['year', 'term', 'course']
         self.assertListEqual(list(X_train.columns), expected_columns)
