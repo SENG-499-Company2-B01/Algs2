@@ -15,7 +15,32 @@ file_path = os.path.join(test_script_dir, "../../data/client_data/schedules.json
 file_path = file_path.replace("\\", "/")
 
 
-class TestFlattenData(unittest.TestCase):
+class TestLoadEnrollmentData(unittest.TestCase):
+    def setUp(self):
+        self.test_file_path = 'test.json'
+        self.test_data = {
+            "year": [2008],
+            "terms": [[
+                {
+                    "term": "summer",
+                    "courses": [
+                        {
+                            "course": "CSC101",
+                            "sections": [
+                                {"num": "A01", "enrolled": 30},
+                                {"num": "A02", "enrolled": 25}
+                            ]
+                        }
+                    ]
+                }
+            ]]
+        }
+        with open(self.test_file_path, 'w') as f:
+            json.dump(self.test_data, f)
+
+    def tearDown(self):
+        os.remove(self.test_file_path)
+
     def test_flatten_data(self):
         data = pd.DataFrame({
             "year": [2008],
@@ -52,8 +77,10 @@ class TestFlattenData(unittest.TestCase):
         actual_output = flatten_data(data)
         pd.testing.assert_frame_equal(actual_output, expected_output)
 
-
-class TestAutoRegressorFunctions(unittest.TestCase):
+    def test_load_enrollment_data(self):
+        expected_output = pd.DataFrame(self.test_data)
+        actual_output = load_enrollment_data(self.test_file_path)
+        pd.testing.assert_frame_equal(actual_output, expected_output)
 
     def test_data_preprocessing(self):
         data = load_enrollment_data(file_path)
@@ -70,40 +97,7 @@ class TestAutoRegressorFunctions(unittest.TestCase):
             ['year', 'term', 'course', 'enrolled', 'subj_CSC', 'subj_ECE', 'subj_SENG', 'CourseOffering'])
         self.assertListEqual(sorted(list(processed_data.columns)), expected_columns)
 
-        # Check if the returned DataFrame does not contain any NaN values
         self.assertFalse(processed_data.isnull().values.any())
-
-
-class TestLoadEnrollmentData(unittest.TestCase):
-    def setUp(self):
-        self.test_file_path = 'test.json'
-        self.test_data = {
-            "year": [2008],
-            "terms": [[
-                {
-                    "term": "summer",
-                    "courses": [
-                        {
-                            "course": "CSC101",
-                            "sections": [
-                                {"num": "A01", "enrolled": 30},
-                                {"num": "A02", "enrolled": 25}
-                            ]
-                        }
-                    ]
-                }
-            ]]
-        }
-        with open(self.test_file_path, 'w') as f:
-            json.dump(self.test_data, f)
-
-    def tearDown(self):
-        os.remove(self.test_file_path)
-
-    def test_load_enrollment_data(self):
-        expected_output = pd.DataFrame(self.test_data)
-        actual_output = load_enrollment_data(self.test_file_path)
-        pd.testing.assert_frame_equal(actual_output, expected_output)
 
     def test_prepare_data(self):
         data = load_enrollment_data(file_path)
@@ -154,6 +148,20 @@ class TestModelTrainingGridSearch(unittest.TestCase):
 
 
 class TestModelTraining(unittest.TestCase):
+    def setUp(self):
+        self.data = load_enrollment_data(file_path)
+        self.data = flatten_data(self.data)
+        self.data = data_preprocessing(self.data)
+
+        self.first_year = self.data['year'].min()
+        self.train_end_year = self.data['year'].max() - 1
+        self.predict_year = self.train_end_year + 1
+
+        self.X_train, self.y_train, self.X_val, self.y_val = prepare_data(
+            self.data, self.first_year, self.train_end_year, self.predict_year)
+
+
+
     def test_model_training(self):
         X_train = pd.DataFrame({
             "year": [2008, 2009],
@@ -169,9 +177,26 @@ class TestModelTraining(unittest.TestCase):
         except Exception as e:
             self.fail(f"model_training raised Exception: {e}")
 
+    def test_model_evaluation(self):
+        model = model_training(self.X_train, self.y_train, RandomForestRegressor())
+        pred_df, mae, rmse, r2 = model_evaluation(model, self.X_val, self.y_val)
+        self.assertIsNotNone(pred_df)
+        self.assertIsNotNone(mae)
+        self.assertIsNotNone(rmse)
+        self.assertIsNotNone(r2)
 
+    def test_plot_results(self):
+        model = model_training(self.X_train, self.y_train, RandomForestRegressor())
+        pred_df, _, _, _ = model_evaluation(model, self.X_val, self.y_val)
+        try:
+            plot_results(pred_df, self.y_val, self.predict_year)
+            self.assertTrue(True)
+        except:
+            self.assertTrue(False)
 
-
+    def test_run_prediction_for_year(self):
+        pred_df = run_prediction_for_year(self.data, self.first_year, self.train_end_year)
+        self.assertIsNotNone(pred_df)
 
 
 if __name__ == "__main__":
