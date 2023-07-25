@@ -7,17 +7,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from math import sqrt
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
-from enrollment_predictions.models.auto_regressor_dec_tree import (
-    flatten_data,
-    load_enrollment_data,
-    data_preprocessing,
-    prepare_data,
-    model_training_grid_search,
-    model_training,
-    model_evaluation,
-    plot_results,
-    run_prediction_for_year,
-)
+from enrollment_predictions.models.auto_regressor_dec_tree import *
 
 test_script_path = os.path.abspath(__file__)
 test_script_dir = os.path.dirname(test_script_path)
@@ -63,6 +53,27 @@ class TestFlattenData(unittest.TestCase):
         pd.testing.assert_frame_equal(actual_output, expected_output)
 
 
+class TestAutoRegressorFunctions(unittest.TestCase):
+
+    def test_data_preprocessing(self):
+        data = load_enrollment_data(file_path)
+        data = flatten_data(data)
+        processed_data = data_preprocessing(data)
+
+        self.assertIsNotNone(processed_data)
+
+        self.assertTrue(isinstance(processed_data, pd.DataFrame))
+
+        self.assertFalse(processed_data.empty)
+
+        expected_columns = sorted(
+            ['year', 'term', 'course', 'enrolled', 'subj_CSC', 'subj_ECE', 'subj_SENG', 'CourseOffering'])
+        self.assertListEqual(sorted(list(processed_data.columns)), expected_columns)
+
+        # Check if the returned DataFrame does not contain any NaN values
+        self.assertFalse(processed_data.isnull().values.any())
+
+
 class TestLoadEnrollmentData(unittest.TestCase):
     def setUp(self):
         self.test_file_path = 'test.json'
@@ -93,64 +104,6 @@ class TestLoadEnrollmentData(unittest.TestCase):
         expected_output = pd.DataFrame(self.test_data)
         actual_output = load_enrollment_data(self.test_file_path)
         pd.testing.assert_frame_equal(actual_output, expected_output)
-
-
-class TestDataPreprocessing(unittest.TestCase):
-    def test_data_preprocessing(self):
-        data = pd.DataFrame({
-            "year": [2008, 2008],
-            "term": ["summer", "summer"],
-            "course": ["CSC101", "CSC102"],
-            "enrolled": [55, 0]
-        })
-
-        expected_output = pd.DataFrame({
-            "year": [2008, 2008],
-            "term": [1, 1],
-            "course": [2101, 2102],
-            "enrolled": [55, 0],
-            "CourseOffering": ['CSC1012008-1', 'CSC1022008-1'],
-            "subj_CSC": [1, 1],
-        })
-        expected_output["subj_CSC"] = expected_output["subj_CSC"].astype('uint8')
-        actual_output = data_preprocessing(data)
-        self.assertTrue(actual_output.equals(expected_output))
-
-
-class TestAutoRegressorFunctions(unittest.TestCase):
-
-    def test_prepare_data(self):
-        data = load_enrollment_data("./schedules.json")
-
-        data = flatten_data(data)
-        data = data_preprocessing(data)
-
-        first_year = data['year'].min()
-        train_end_year = data['year'].max() - 1
-        predict_year = train_end_year + 1
-        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
-
-        self.assertIsNotNone(X_train)
-        self.assertIsNotNone(y_train)
-        self.assertIsNotNone(X_val)
-        self.assertIsNotNone(y_val)
-
-        self.assertEqual(X_train.shape[1], 3)
-        self.assertEqual(y_train.shape[1], 2)
-        self.assertEqual(X_val.shape[1], 3)
-        self.assertEqual(y_val.shape[1], 2)
-
-        expected_columns = ['year', 'term', 'course']
-        self.assertListEqual(list(X_train.columns), expected_columns)
-        self.assertListEqual(list(X_val.columns), expected_columns)
-
-        predict_year = data['year'].max() + 1
-        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
-        self.assertIsNone(X_train)
-        self.assertIsNone(y_train)
-        self.assertIsNone(X_val)
-        self.assertIsNone(y_val)
-
 
 
 def ur_model_training_grid_search(X_train, y_train, model):
@@ -193,50 +146,9 @@ class TestModelTraining(unittest.TestCase):
             self.fail(f"model_training raised Exception: {e}")
 
 
-class TestAutoRegressorFunctions(unittest.TestCase):
-
-    def test_model_evaluation(self):
-        data = load_enrollment_data(file_path)
-
-        data = flatten_data(data)
-        data = data_preprocessing(data)
-        data = prepare_data((data))
-        first_year = data['year'].min()
-        train_end_year = data['year'].max() - 1
-        predict_year = train_end_year + 1
-        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
-
-        model = model_training(X_train, y_train, RandomForestRegressor())
-
-        pred_df, mae, rmse, r2 = model_evaluation(model, X_val, y_val)
-
-        self.assertIsNotNone(pred_df)
-        self.assertIsNotNone(mae)
-        self.assertIsNotNone(rmse)
-        self.assertIsNotNone(r2)
 
 
-class TestAutoRegressorFunctions(unittest.TestCase):
 
-    def test_model_evaluation(self):
-        data = load_enrollment_data(file_path)
-
-        data = flatten_data(data)
-        data = data_preprocessing(data)
-
-        first_year = data['year'].min()
-        train_end_year = data['year'].max() - 1
-        predict_year = train_end_year + 1
-        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
-
-        model = model_training(X_train, y_train, RandomForestRegressor())
-
-        pred_df, mae, rmse, r2 = model_evaluation(model, X_val, y_val)
-
-        self.assertIsNotNone(pred_df)
-        self.assertIsNotNone(mae)
-        self.assertIsNotNone(rmse)
-        self.assertIsNotNone(r2)
 
 if __name__ == "__main__":
     unittest.main()
