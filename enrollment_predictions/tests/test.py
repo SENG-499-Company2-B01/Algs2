@@ -105,6 +105,39 @@ class TestLoadEnrollmentData(unittest.TestCase):
         actual_output = load_enrollment_data(self.test_file_path)
         pd.testing.assert_frame_equal(actual_output, expected_output)
 
+    def test_prepare_data(self):
+        data = load_enrollment_data(file_path)
+
+        data = flatten_data(data)
+        data = data_preprocessing(data)
+
+        first_year = data['year'].min()
+        train_end_year = data['year'].max() - 1
+        predict_year = train_end_year + 1
+
+        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
+
+        self.assertIsNotNone(X_train)
+        self.assertIsNotNone(y_train)
+        self.assertIsNotNone(X_val)
+        self.assertIsNotNone(y_val)
+
+        self.assertEqual(X_train.shape[1], 3)
+        self.assertEqual(y_train.shape[1], 2)
+        self.assertEqual(X_val.shape[1], 3)
+        self.assertEqual(y_val.shape[1], 2)
+
+        expected_columns = ['year', 'term', 'course']
+        self.assertListEqual(list(X_train.columns), expected_columns)
+        self.assertListEqual(list(X_val.columns), expected_columns)
+
+        predict_year = data['year'].max() + 1
+        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
+        self.assertIsNone(X_train)
+        self.assertIsNone(y_train)
+        self.assertIsNone(X_val)
+        self.assertIsNone(y_val)
+
 
 def ur_model_training_grid_search(X_train, y_train, model):
     model.fit(X_train, y_train)
