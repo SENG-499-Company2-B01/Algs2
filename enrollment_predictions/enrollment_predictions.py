@@ -1,8 +1,9 @@
 import pandas as pd
-from .models.auto_regressor_dec_tree import data_preprocessing
-from .models.auto_regressor_dec_tree import run_prediction_for_year
-from .models.auto_regressor_dec_tree import load_enrollment_data
-from .models.most_recent_enroll import most_recent_data_preprocessing, most_recent_predict_year
+from .models.regressor_model import data_preprocessing
+from .models.regressor_model import handle_missing_data
+from .models.regressor_model import model_training
+from .models.regressor_model import model_predict
+
 
 def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.DataFrame:
     """_summary_
@@ -16,12 +17,13 @@ def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.Data
     """
 
     train_data = train_data.copy()
+
     train_data = data_preprocessing(train_data)
     if train_data is None or train_data.empty:
         print("Error: Failed during data preprocessing.")
         return
 
-    #Verify that predict data is for one year after last train data
+    # erify that predict data is for one year after last train data
     if train_data['year'].max() + 1 != X['year'].min():
         print("Error: Predict data is not for one year after last train data.")
         return None
@@ -36,25 +38,23 @@ def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.Data
         print("Error: Predict data is not for three terms.")
         return None
 
-    predictions, _, _ = run_prediction_for_year(
-        train_data, train_data['year'].min(), train_data['year'].max())
+    # Handle missing data
+    X_train, y_train = handle_missing_data(train_data)
 
-    return predictions
+    # Train model
+    model = model_training(X_train, y_train)
+    if model is None:
+        print("Error: Failed during model training.")
+        return None
+
+    pred_df = model_predict(model, X_train, y_train['offering'])
+    if pred_df is None:
+        print("Error: Failed during model prediction.")
+        return None
+
+    return pred_df
 
 def most_recent_enrollments(historic_schedules, courses):
     historic_schedules = most_recent_data_preprocessing(historic_schedules)
     result = most_recent_predict_year(historic_schedules, courses)
     return(result)
-
-if __name__ == "__main__":
-    print("Running enrollment_predictions.py")
-    enrollment_data_path = "./data/client_data/schedules.json"
-    train_data = load_enrollment_data(enrollment_data_path)
-    if train_data is None or train_data.empty:
-        print("Error: Empty data or failed to load data.")
-        exit()
-        
-    # Specify the target year and the enrollment threshold
-    target = 2023
-    #Need to get X from somewhere
-    #enrollment_predictions = enrollment_predictions(train_data, X)
