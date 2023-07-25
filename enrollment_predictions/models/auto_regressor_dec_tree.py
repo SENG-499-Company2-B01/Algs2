@@ -94,7 +94,6 @@ def data_preprocessing(data):
 
 
 def prepare_data(data, first_year, train_end_year, predict_year):
-    # Perform train-test split
     train_data = data[(
         data['year'] >= first_year) & (data['year'] <= train_end_year)].copy()
 
@@ -113,11 +112,9 @@ def prepare_data(data, first_year, train_end_year, predict_year):
     val_features = val_data.columns[~val_data.columns.isin(exclude_columns)]
     val_target = ['enrolled', 'CourseOffering']
 
-    # Exclude 'CourseOffering' before imputation
     X_train = train_data[train_features].drop(columns=['CourseOffering'])
     X_val = val_data[val_features].drop(columns=['CourseOffering'])
 
-    # Impute missing values
     imp = SimpleImputer(keep_empty_features=True)
     X_train_imputed = imp.fit_transform(X_train)
     X_val_imputed = imp.transform(X_val)

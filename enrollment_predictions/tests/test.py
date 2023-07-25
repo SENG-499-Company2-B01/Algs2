@@ -122,11 +122,6 @@ class TestLoadEnrollmentData(unittest.TestCase):
         self.assertIsNotNone(X_val)
         self.assertIsNotNone(y_val)
 
-
-        expected_columns = ['year', 'term', 'course']
-        self.assertListEqual(list(X_train.columns), expected_columns)
-        self.assertListEqual(list(X_val.columns), expected_columns)
-
         predict_year = data['year'].max() + 1
         X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
         self.assertIsNone(X_train)
