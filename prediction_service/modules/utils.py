@@ -25,6 +25,41 @@ def filter_courses_by_term(courses, term):
             filtered_courses.append(course)
     return filtered_courses
 
+# Because sometimes courses are sent with "shorthand" and sometimes with "course"
+# This allows the module to read either
+def change_course_to_shorthand(courses):
+    '''Takes courses in the following format:
+    [
+        {
+            "name": str, // e.g., “Fundamentals of Programming with Engineering Applications”
+            "course" or "shorthand": str, // e.g., “CSC111”
+            "prerequisites": str[][]
+            "corequisites": str[][]
+            “terms_offered”: str[] // “fall”, “spring”, “summer”
+        },
+        ...
+    ]
+    And returns the list of courses in the following format:
+    [
+        {
+            "name": str, // e.g., “Fundamentals of Programming with Engineering Applications”
+            "course": str, // e.g., “CSC111”
+            "shorthand": str, // e.g., “CSC111”
+            "prerequisites": str[][]
+            "corequisites": str[][]
+            “terms_offered”: str[] // “fall”, “spring”, “summer”
+        },
+        ...
+    ]'''
+    
+    for course in courses:
+        if "shorthand" not in course:
+            course["shorthand"] = course["course"]
+        if "course" not in course:
+            course["course"] = course["shorthand"]
+    return courses
+
+
 def reformat_courses(courses, year, term):
     '''Takes courses in the same format as the above function
     And returns the list of courses in the following format:
