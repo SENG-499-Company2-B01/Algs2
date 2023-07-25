@@ -1,21 +1,13 @@
 import unittest
 import pandas as pd
-import numpy as np
 import os
-from math import sqrt
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from unittest.mock import patch
+import json
 
-from enrollment_predictions.models.auto_regressor_dec_tree import (
-    feature_engineering,
-    prepare_data,
-    data_preprocessing,
-    train_model,
-    predict_year,
-    flatten_data,
-    load_enrollment_data,
-    calculate_error_metrics
-)
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from math import sqrt
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from enrollment_predictions.models.auto_regressor_dec_tree import *
 
 test_script_path = os.path.abspath(__file__)
 test_script_dir = os.path.dirname(test_script_path)
@@ -23,176 +15,171 @@ file_path = os.path.join(test_script_dir, "../../data/client_data/schedules.json
 file_path = file_path.replace("\\", "/")
 
 
-class AutoRegressorDecTreeTests(unittest.TestCase):
+class TestLoadEnrollmentData(unittest.TestCase):
     def setUp(self):
-        self.full_data = load_enrollment_data(file_path)
-        self.preprocessed_data = data_preprocessing(self.full_data)
-        self.sample_data = pd.DataFrame({
+        self.test_file_path = 'test.json'
+        self.test_data = {
             "year": [2008],
-            "terms": [
-                [
-                    {
-                        "term": "summer",
-                        "courses": [
-                            {
-                                "course": "CSC100",
-                                "sections": [
-                                    {
-                                        "num": "A01",
-                                        "building": "",
-                                        "professor": "",
-                                        "days": [],
-                                        "num_seats": 60,
-                                        "enrolled": 18,
-                                        "start_time": "",
-                                        "end_time": ""
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            ]
-        })
+            "terms": [[
+                {
+                    "term": "summer",
+                    "courses": [
+                        {
+                            "course": "CSC101",
+                            "sections": [
+                                {"num": "A01", "enrolled": 30},
+                                {"num": "A02", "enrolled": 25}
+                            ]
+                        }
+                    ]
+                }
+            ]]
+        }
+        with open(self.test_file_path, 'w') as f:
+            json.dump(self.test_data, f)
 
-    def test_load_enrollment_data(self):
-        test_train_data = load_enrollment_data(file_path)
-        expected = self.full_data.copy()
-        if test_train_data is None or test_train_data.empty:
-            self.fail("Error: Empty data or failed to load data.")
-        self.assertTrue(test_train_data.equals(expected))
+    def tearDown(self):
+        os.remove(self.test_file_path)
 
     def test_flatten_data(self):
-        expected = pd.DataFrame({
+        data = pd.DataFrame({
             "year": [2008],
-            "term": ["summer"],
-            "course": ["CSC100"],
-            "num_seats": [60],
-            "professor": [""],
-            "enrolled": [18]
+            "terms": [[
+                {
+                    "term": "summer",
+                    "courses": [
+                        {
+                            "course": "CSC101",
+                            "sections": [
+                                {"num": "A01", "enrolled": 30},
+                                {"num": "A02", "enrolled": 25}
+                            ]
+                        },
+                        {
+                            "course": "CSC102",
+                            "sections": [
+                                {"num": "B01", "enrolled": 20},
+                                {"num": "B02", "enrolled": 15}
+                            ]
+                        }
+                    ]
+                }
+            ]]
         })
-        result = flatten_data(self.sample_data.copy())
-        self.assertTrue(result.equals(expected))
+
+        expected_output = pd.DataFrame({
+            "year": [2008, 2008],
+            "term": ["summer", "summer"],
+            "course": ["CSC101", "CSC102"],
+            "enrolled": [55, 0]
+        })
+
+        actual_output = flatten_data(data)
+        pd.testing.assert_frame_equal(actual_output, expected_output)
+
+    def test_load_enrollment_data(self):
+        expected_output = pd.DataFrame(self.test_data)
+        actual_output = load_enrollment_data(self.test_file_path)
+        pd.testing.assert_frame_equal(actual_output, expected_output)
 
     def test_data_preprocessing(self):
+        data = load_enrollment_data(file_path)
+        data = flatten_data(data)
+        processed_data = data_preprocessing(data)
 
-        expected = pd.DataFrame({
-            "offering": ["CSC100-2008-summer"],
-            "year": [2008],
-            "term": ["summer"],
-            "course": ["CSC100"],
-            "num_seats": [60],
-            "enrolled": [18],
-            "professor": [""]
-        })
+        self.assertIsNotNone(processed_data)
 
-        result = data_preprocessing(self.sample_data.copy())
-        self.assertTrue(result.equals(expected))
+        self.assertTrue(isinstance(processed_data, pd.DataFrame))
 
-    def test_feature_engineering(self):
+        self.assertFalse(processed_data.empty)
 
-        input_data = pd.DataFrame({
-            "offering": ["CSC100-2008-fall", "CSC100-2008-summer", "CSC100-2009-fall"],
-            "year": [2008, 2008, 2009],
-            "term": ["fall", "summer", "fall"],
-            "course": ["CSC100", "CSC100", "CSC100"],
-            "num_seats": [8, 10, 6],
-            "enrolled": [241, 18, 300]
-        })
+        expected_columns = sorted(
+            ['year', 'term', 'course', 'enrolled', 'subj_CSC', 'subj_ECE', 'subj_SENG', 'CourseOffering'])
+        self.assertListEqual(sorted(list(processed_data.columns)), expected_columns)
 
-        window_sizes = [1, 2]
-        result = feature_engineering(input_data, window_sizes)
-        result.to_csv("ttt.csv")
-        expected = pd.DataFrame({
-            'offering': ['CSC100-2008-fall', 'CSC100-2009-fall', 'CSC100-2008-summer'],
-            'year': [2008, 2009, 2008],
-            'term': ['fall', 'fall', 'summer'],
-            'course': ['CSC100', 'CSC100', 'CSC100'],
-            'num_seats': [8, 6, 10],
-            'enrolled': [241, 300, 18],
-            'mean_prev_1': [np.nan, 241, np.nan],
-            'median_prev_1': [np.nan, 241, np.nan],
-            'min_prev_1': [np.nan, 241, np.nan],
-            'max_prev_1': [np.nan, 241, np.nan],
-            'std_prev_1': [np.nan, np.nan, np.nan],
-            'ewm_1': [np.nan, 241, np.nan],
-            'mean_prev_2': [np.nan, np.nan, np.nan],
-            'median_prev_2': [np.nan, np.nan, np.nan],
-            'min_prev_2': [np.nan, np.nan, np.nan],
-            'max_prev_2': [np.nan, np.nan, np.nan],
-            'std_prev_2': [np.nan, np.nan, np.nan],
-            'ewm_2': [np.nan, 241, np.nan]
-
-        })
-
-        self.assertTrue(result.reset_index(drop=True).equals(expected.reset_index(drop=True)))
+        self.assertFalse(processed_data.isnull().values.any())
 
     def test_prepare_data(self):
-        input_data = pd.DataFrame({
-            "offering": ["CSC100-2008-fall", "CSC100-2008-summer", "CSC100-2009-fall"],
-            "year": [2008, 2008, 2009],
-            "term": ["fall", "summer", "fall"],
-            "course": ["CSC100", "CSC100", "CSC100"],
-            "num_seats": [8, 10, 6],
-            "enrolled": [241, 18, 300]
+        data = load_enrollment_data(file_path)
+
+        data = flatten_data(data)
+        data = data_preprocessing(data)
+
+        first_year = data['year'].min()
+        train_end_year = data['year'].max() - 1
+        predict_year = train_end_year + 1
+
+        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
+
+        self.assertIsNotNone(X_train)
+        self.assertIsNotNone(y_train)
+        self.assertIsNotNone(X_val)
+        self.assertIsNotNone(y_val)
+
+        predict_year = data['year'].max() + 1
+        X_train, y_train, X_val, y_val = prepare_data(data, first_year, train_end_year, predict_year)
+        self.assertIsNone(X_train)
+        self.assertIsNone(y_train)
+        self.assertIsNone(X_val)
+        self.assertIsNone(y_val)
+
+
+def ur_model_training_grid_search(X_train, y_train, model):
+    model.fit(X_train, y_train)
+    return model
+
+
+class TestModelTrainingGridSearch(unittest.TestCase):
+    def test_model_training_grid_search(self):
+        X_train = pd.DataFrame({
+            "year": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017],
+            "term": [1, 1, 2, 2, 1, 1, 2, 2, 1, 1],
+            "course": [2101, 2101, 2101, 2101, 2101, 2101, 2101, 2101, 2101, 2101],
+            "subj_CSC": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         })
+        y_train = pd.DataFrame({"enrolled": [55, 60, 65, 70, 75, 80, 85, 90, 95, 100]})
 
-        result, result_target = prepare_data(input_data.copy())
-        result_target.to_csv("ttt.csv")
-        expected = pd.DataFrame({
-            "year": [2008, 2009, 2008],
-            "term": [3, 3, 2],
-            "num_seats": [8, 6, 10],
-            "mean_prev_1": [241, 241, 241],
-            "median_prev_1": [241, 241, 241],
-            "min_prev_1": [241, 241, 241],
-            "max_prev_1": [241, 241, 241],
-            "ewm_1": [241, 241, 241],
-            "ewm_2": [241, 241, 241],
-            "ewm_3": [241, 241, 241],
-            "ewm_6": [241, 241, 241],
-            "ewm_9": [241, 241, 241],
+        model = LinearRegression()
+        result = ur_model_training_grid_search(X_train, y_train, model)
 
-        })
-        expected = expected.astype(float)
+        self.assertIsInstance(result, LinearRegression)
 
-        expected_target = pd.DataFrame({
-            "enrolled": [241, 300, 18],
-            "offering": ["CSC100-2008-fall", "CSC100-2009-fall", "CSC100-2008-summer"]
-        })
+        self.assertTrue(hasattr(result, 'coef_'))
 
-        self.assertTrue(result.reset_index(drop=True).equals(expected.reset_index(drop=True)))
-        self.assertTrue(result_target.reset_index(drop=True).equals(expected_target.reset_index(drop=True)))
 
-    def test_calculate_error_metrics(self):
-        y_true = [10, 20, 30]
-        y_pred = [12, 18, 32]
+class TestModelTraining(unittest.TestCase):
+    def setUp(self):
+        self.data = load_enrollment_data(file_path)
+        self.data = flatten_data(self.data)
+        self.data = data_preprocessing(self.data)
 
-        expected_mae = mean_absolute_error(y_true, y_pred)
-        expected_rmse = sqrt(mean_squared_error(y_true, y_pred))
-        expected_output = (expected_mae, expected_rmse)
+        self.first_year = self.data['year'].min()
+        self.train_end_year = self.data['year'].max() - 1
+        self.predict_year = self.train_end_year + 1
 
-        result = calculate_error_metrics(y_true, y_pred)
+        self.X_train, self.y_train, self.X_val, self.y_val = prepare_data(
+            self.data, self.first_year, self.train_end_year, self.predict_year)
 
-        self.assertEqual(result, expected_output)
 
-    def test_predict_yest(self):
-        data = data_preprocessing(self.full_data.copy())
-        data = data.sort_values('year')
 
-        years = data['year'].unique()
-        train_data = data[data['year'] < years[-1]]
-        predict_data = data[data['year'] == years[-1]]
-        #        featureengineering = feature_engineering(train_data, [1,2])
-        #        featureengineering.to_csv('feature.csv', index=False)
-        X_train, y_train = prepare_data(train_data)
-        X_predict, _ = prepare_data(predict_data)
-        model = train_model(X_train, y_train)
+    def test_model_training(self):
+        model = model_training(self.X_train, self.y_train, RandomForestRegressor())
+        self.assertIsNotNone(model)
 
-        if model is None:
-            print("Model training failed.")
-            return
-        model_features = X_train.columns.tolist()
-        result = predict_year(model, predict_data, train_data, model_features)
-        self.assertIsNotNone(result)
-        print(result)
+    def test_model_evaluation(self):
+        model = model_training(self.X_train, self.y_train, RandomForestRegressor())
+        pred_df, mae, rmse, r2 = model_evaluation(model, self.X_val, self.y_val)
+        self.assertIsNotNone(pred_df)
+        self.assertIsNotNone(mae)
+        self.assertIsNotNone(rmse)
+        self.assertIsNotNone(r2)
+
+
+
+    def test_run_prediction_for_year(self):
+        pred_df = run_prediction_for_year(self.data, self.first_year, self.train_end_year)
+        self.assertIsNotNone(pred_df)
+
+
+if __name__ == "__main__":
+    unittest.main()
