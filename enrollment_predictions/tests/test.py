@@ -163,19 +163,8 @@ class TestModelTraining(unittest.TestCase):
 
 
     def test_model_training(self):
-        X_train = pd.DataFrame({
-            "year": [2008, 2009],
-            "term": [1, 1],
-            "course": [2101, 2101],
-            "subj_CSC": [1, 1],
-        })
-        y_train = pd.Series([55, 60])
-
-        model = RandomForestRegressor(random_state=0)
-        try:
-            model_training(X_train, y_train, model)
-        except Exception as e:
-            self.fail(f"model_training raised Exception: {e}")
+        model = model_training(self.X_train, self.y_train, RandomForestRegressor())
+        self.assertIsNotNone(model)
 
     def test_model_evaluation(self):
         model = model_training(self.X_train, self.y_train, RandomForestRegressor())
