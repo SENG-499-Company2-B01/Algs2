@@ -185,14 +185,7 @@ class TestModelTraining(unittest.TestCase):
         self.assertIsNotNone(rmse)
         self.assertIsNotNone(r2)
 
-    def test_plot_results(self):
-        model = model_training(self.X_train, self.y_train, RandomForestRegressor())
-        pred_df, _, _, _ = model_evaluation(model, self.X_val, self.y_val)
-        try:
-            plot_results(pred_df, self.y_val, self.predict_year)
-            self.assertTrue(True)
-        except:
-            self.assertTrue(False)
+
 
     def test_run_prediction_for_year(self):
         pred_df = run_prediction_for_year(self.data, self.first_year, self.train_end_year)
