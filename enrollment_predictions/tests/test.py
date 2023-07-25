@@ -196,11 +196,11 @@ class TestModelTraining(unittest.TestCase):
 class TestAutoRegressorFunctions(unittest.TestCase):
 
     def test_model_evaluation(self):
-        data = load_enrollment_data("./schedules.json")
+        data = load_enrollment_data(file_path)
 
         data = flatten_data(data)
         data = data_preprocessing(data)
-
+        data = prepare_data((data))
         first_year = data['year'].min()
         train_end_year = data['year'].max() - 1
         predict_year = train_end_year + 1
