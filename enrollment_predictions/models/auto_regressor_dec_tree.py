@@ -189,6 +189,20 @@ def plot_results(pred_df, y_val, predict_year):
     plt.show()
 
 
+def calc_results(pred_df, y_val):
+    pred_df['term'] = pred_df['CourseOffering'].str[-1]
+    pred_df['year'] = pred_df['CourseOffering'].str[-6:-2]
+    pred_df['year'] = pred_df['year'].astype(int)
+    pred_df['Course'] = pred_df['CourseOffering'].str[:-6]
+    pred_df['Actual'] = y_val['enrolled']
+
+    pred_df['Error'] = pred_df['Predicted'] - pred_df['Actual']
+    pred_df['AbsError'] = pred_df['Error'].abs()
+    pred_df['AbsPercentError'] = pred_df['AbsError'] / pred_df['Actual']
+
+    return pred_df
+
+
 def run_prediction_for_year(data, first_year, train_end_year):
     predict_year = train_end_year + 1
     X_train, y_train, X_val, y_val = \
@@ -226,14 +240,38 @@ def main():
         print("Error: Failed during data preprocessing.")
         return
 
+    results = {}
+
     first_year = data['year'].min()
     last_year = data['year'].max()
-    for train_end_year in range(last_year-1, last_year):
+    # for train_end_year in range(last_year-1, last_year):
+    for train_end_year in range(first_year+1, last_year):
         pred_df, y_val, predict_year = run_prediction_for_year(
             data, first_year, train_end_year)
 
         if pred_df is not None:
-            plot_results(pred_df, y_val, predict_year)
+            # plot_results(pred_df, y_val, predict_year)
+            results[predict_year] = calc_results(pred_df, y_val)
+
+    courses_stats = {}
+    for year in results:
+        for index, course in results[year].iterrows():
+            course_name = course['Course']
+            if course_name not in courses_stats:
+                courses_stats[course_name] = [course]
+            else:
+                courses_stats[course_name].append(course)
+    
+    # Save results to csv and get total stats
+    sum = {}
+    for course in courses_stats:
+        course_df = pd.DataFrame(courses_stats[course])
+        course_df.to_csv(f'./data/results/{course}.csv', index=False)
+        sum[course] = course_df['AbsPercentError'].sum() / len(course_df)
+
+    # Save total stats to csv
+    sum_df = pd.DataFrame.from_dict(sum, orient='index', columns=['AbsPercentError'])
+    sum_df.to_csv('./data/results/total.csv', index=True)
 
 
 if __name__ == "__main__":
