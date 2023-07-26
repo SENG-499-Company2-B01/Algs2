@@ -65,23 +65,20 @@ def reformat_courses(courses, year, term):
     And returns the list of courses in the following format:
     [
         {
-            "Term": 202205,
-            "Subj": "ADMN",
-            "Num": "001",
-            "Sched Type": "Lec"
+            "term": "spring",
+            "year": 2023,
+            "course": "CSC110"
         },
         ...
     ]'''
     
-    formatted_term = year + _term_plain_to_code(term)
+    #formatted_term = year + _term_plain_to_code(term)
     reformatted_courses = []
     for course in courses:
-        subj, num = _shorthand_to_subj_and_num(course["shorthand"])
         reformatted_courses.append({
-            "Term": formatted_term,
-            "Subj": subj,
-            "Num": num,
-            "Sched Type": "LEC"
+            "term": term,
+            "year": year,
+            "course": course["shorthand"]
         })
     return reformatted_courses
 
@@ -151,11 +148,9 @@ def reformat_predictions(courses, predictions):
     And a list of courses in the following format:
     [
         {
-            "Term": 202205,
-            "Subj": "ADMN",
-            "Num": "001",
-            "Section": "W01",
-            "Sched Type": "LEC"
+            "term": "spring",
+            "year": 2023,
+            "course": "CSC110"
         },
         ...
     ]
@@ -170,10 +165,11 @@ def reformat_predictions(courses, predictions):
         ]
     }
     '''
+    print(predictions)
     result = {"estimates": []}
     for course, prediction in zip(courses, predictions):
         result["estimates"].append({
-            "course": course["Subj"] + course["Num"],
+            "course": course["course"],
             "estimate": prediction,
         })
     return result

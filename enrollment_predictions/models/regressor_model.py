@@ -1,9 +1,46 @@
 import pandas as pd
 import numpy as np
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+
+def flatten_data(data):
+    """ This function flattens the nested JSON data into a flat dataframe
+
+    Args:
+        data (pd.DataFrame): The JSON data
+    """
+    rows = []
+    for _, row in data.iterrows():
+        year = row["year"]
+        terms = row["terms"]
+
+        for term_data in terms:
+            term = term_data["term"]
+
+            course_enrollments = {}
+            for course_data in term_data["courses"]:
+                course = course_data["course"]
+                sections = course_data["sections"]
+
+                total_enrollment = 0
+                for section_data in sections:
+                    if section_data["num"].startswith('A'):
+                        total_enrollment += section_data["enrolled"]
+
+                course_enrollments[course] = total_enrollment
+
+            for course, enrollment in course_enrollments.items():
+                rows.append({
+                    "year": year,
+                    "term": term,
+                    "course": course,
+                    "enrolled": enrollment
+                })
+
+    return pd.DataFrame(rows)
 
 
 def data_preprocessing(data, included_subjects=['SENG', 'CSC', 'ECE']):
@@ -23,7 +60,7 @@ def data_preprocessing(data, included_subjects=['SENG', 'CSC', 'ECE']):
     data = data[data['subj'].isin(included_subjects)]
 
     # Create unique identifier for each course offering
-    data['offering'] = data['course'] + data['year'].astype(str) + "-" + data['term'].astype(str)
+    data['offering'] = data['course'] + "-" + data['year'].astype(str) + "-" + data['term'].astype(str)
 
     # Turn terms into numerical values
     season_mapping = {'summer': 1, 'fall': 2, 'spring': 3}
@@ -63,7 +100,7 @@ def handle_missing_data(data):
     return X_imputed, y
 
 
-def model_training(X_train, y_train, model):
+def model_training(X_train, y_train, model=RandomForestRegressor()):
     """
     Trains the given model with the provided training data.
 
@@ -83,7 +120,7 @@ def model_training(X_train, y_train, model):
         return None
 
 
-def model_predict(model, X_predict, offerings):
+def model_predict(model, X_predict):
     """
     Makes predictions using the trained model.
 
@@ -96,10 +133,18 @@ def model_predict(model, X_predict, offerings):
         pd.DataFrame: A dataframe containing the course offerings and the 
         corresponding predictions.
     """
+    offerings = X_predict['offering']
+    split_offerings = offerings.str.split('-')
+    courses = [offering[0] for offering in split_offerings]
+    features = X_predict.columns.difference(['offering'])
+
+    # Exclude 'offering' before imputation
+    X_predict= X_predict.loc[:, features]
+
     y_pred = model.predict(X_predict)
 
     predictions_df = pd.DataFrame({
-        'offering': offerings,
+        'course': courses,
         'predicted': y_pred
     })
 

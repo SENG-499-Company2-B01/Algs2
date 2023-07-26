@@ -2,10 +2,10 @@ import requests
 import json
 
 # Test endpoint locally
-# base_url = 'http://localhost:8001'
+base_url = 'http://localhost:8001'
 
 # Test endpoint from dev deployment
-base_url = 'https://algs2-dev.onrender.com'
+# base_url = 'https://algs2-dev.onrender.com'
 
 # Test endpoint from prod deployment
 # base_url = 'https://algs2.onrender.com'
