@@ -27,7 +27,7 @@ def filter_courses_by_term(courses, term):
 
 # Because sometimes courses are sent with "shorthand" and sometimes with "course"
 # This allows the module to read either
-def change_course_to_shorthand(courses):
+def fix_course_and_shorthand(courses):
     '''Takes courses in the following format:
     [
         {
