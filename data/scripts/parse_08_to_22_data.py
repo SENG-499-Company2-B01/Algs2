@@ -23,13 +23,23 @@ sched_types = {
     'Work Term': 'WRK',
     'Individually Supervised Study': 'ISS'
 }
+
+# Only include courses that are in the list of courses gotten from the file courses.json
+courses_json = json.load(open('data/client_data/courses.json'))
+
+# Make a list of courses to include from the courses.json file shorthand key
+courses_to_include = []
+for course in courses_json:
+    courses_to_include.append(course['shorthand'])
+
 courses = []
 broken_courses = []
 for item in obj:
     if item is None: 
         continue
     subj = item["subject"]
-    if subj in ["ECE", "SENG", "CSC"]:
+    # if subj in ["ECE", "SENG", "CSC"]:
+    if subj + item["courseNumber"] in courses_to_include:
         sched_type = item["scheduleTypeDescription"]
         if len(item["meetingsFaculty"]) > 0:
             fac = item["meetingsFaculty"][0]
