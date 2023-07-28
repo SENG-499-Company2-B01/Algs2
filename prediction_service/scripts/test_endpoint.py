@@ -11,208 +11,479 @@ base_url = 'http://localhost:8001'
 # base_url = 'https://algs2.onrender.com'
 
 url = f'{base_url}/predict'
-courses = [{
-	"name": "Software Development Methods",
-	"shorthand": "SENG265",
-	"course": "SENG265",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["CSC115", "CSC116"]
-	],
-	"corequisites": []
-}, {
-	"name": "Software Testing",
-	"shorthand": "SENG275",
-	"course": "SENG275",
-	"terms_offered": ["spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["SENG265"]
-	],
-	"corequisites": []
-}, {
-	"name": "Human Computer Interaction",
-	"shorthand": "SENG310",
-	"course": "SENG310",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["SENG265", "ECE241"]
-	],
-	"corequisites": []
-}, {
-	"name": "Software Quality Engineering",
-	"shorthand": "SENG426",
-	"course": "SENG426",
-	"terms_offered": ["summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["SENG275"],
-		["SENG321", "SENG371", "ECE356"]
-	],
-	"corequisites": []
-}, {
-	"name": "Embedded Systems",
-	"shorthand": "SENG440",
-	"course": "SENG440",
-	"terms_offered": ["summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["ECE355", "CSC355"]
-	],
-	"corequisites": []
-}, {
-	"name": "Design Project II",
-	"shorthand": "SENG499",
-	"course": "SENG499",
-	"terms_offered": ["summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["SENG350"],
-		["ECE363", "CSC361"],
-		["ENGR002"],
-		["CSC370"],
-		["SENG321"]
-	],
-	"corequisites": []
-}, {
-	"name": "Fundamentals of Programming II",
-	"shorthand": "CSC115",
-	"course": "CSC115",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["CSC110", "CSC111"]
-	],
-	"corequisites": []
-}, {
-	"name": "Fundamentals of Programming with Engineering Applications II",
-	"shorthand": "CSC116",
-	"course": "CSC116",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["CSC110", "CSC111"]
-	],
-	"corequisites": []
-}, {
-	"name": "Introduction to Computer Architecture",
-	"shorthand": "CSC230",
-	"course": "CSC230",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["CSC115", "CSC116"]
-	],
-	"corequisites": []
-}, {
-	"name": "Algorithms and Data Structures I",
-	"shorthand": "CSC225",
-	"course": "CSC225",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["CSC115", "CSC116"],
-		["MATH122"]
-	],
-	"corequisites": []
-}, {
-	"name": "Algorithms and Data Structures II",
-	"shorthand": "CSC226",
-	"course": "CSC226",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["CSC225"],
-		["GEOG226", "PSYC300A", "STAT254", "STAT255", "STAT260"]
-	],
-	"corequisites": ["GEOG226", "PSYC300A", "STAT254", "STAT255", "STAT260"]
-}, {
-	"name": "Foundations of Computer Science",
-	"shorthand": "CSC320",
-	"course": "CSC320",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["CSC226"]
-	],
-	"corequisites": []
-}, {
-	"name": "Operating Systems",
-	"shorthand": "CSC360",
-	"course": "CSC360",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["SENG265", "CSC225"],
-		["ECE255", "CSC230"]
-	],
-	"corequisites": []
-}, {
-	"name": "Database Systems",
-	"shorthand": "CSC370",
-	"course": "CSC370",
-	"terms_offered": ["fall", "spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["SENG265", "CSC225"]
-	],
-	"corequisites": []
-}, {
-	"name": "Continuous-Time Signals and Systems",
-	"shorthand": "ECE260",
-	"course": "ECE260",
-	"terms_offered": ["fall", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["MATH101"],
-		["MATH110", "MATH211"]
-	],
-	"corequisites": ["MATH211"]
-}, {
-	"name": "Digital Signal Processing I",
-	"shorthand": "ECE310",
-	"course": "ECE310",
-	"terms_offered": ["spring", "summer"],
-	"peng": False,
-	"min_enroll": 5,
-	"hours": [3, 0, 0],
-	"prerequisites": [
-		["ECE260"]
-	],
-	"corequisites": []
-}]
+courses = [
+  {
+    "shorthand": "CSC111",
+    "name": "Fundamentals of Programming with Engineering Applications",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring"
+    ]
+  },
+  {
+    "shorthand": "ENGR110",
+    "name": "Design and Communication I",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall"
+    ]
+  },
+  {
+    "shorthand": "ENGR130",
+    "name": "Introduction to Professional Practice",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring"
+    ]
+  },
+  {
+    "shorthand": "MATH100",
+    "name": "Calculus I",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "MATH109",
+    "name": "Introduction to Calculus",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "MATH110",
+    "name": "Matrix Algebra for Engineers",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall"
+    ]
+  },
+  {
+    "shorthand": "PHYS110",
+    "name": "Introductory Physics I",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring"
+    ]
+  },
+  {
+    "shorthand": "CSC115",
+    "name": "Fundamentals of Programming II",
+    "prerequisites": [
+      [
+        "CSC110"
+      ],
+      [
+        "CSC111"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "MATH101",
+    "name": "Calculus II",
+    "prerequisites": [
+      [
+        "MATH100"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "ECE255",
+    "name": "Introduction to Computer Architecture",
+    "prerequisites": [
+      [
+        "CSC111"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall"
+    ]
+  },
+  {
+    "shorthand": "CSC230",
+    "name": "Introduction to Computer Architecture",
+    "prerequisites": [
+      [
+        "CSC115"
+      ],
+      [
+        "CSC116"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "CHEM101",
+    "name": "Fundamentals of Chemistry from Atoms to Materials",
+    "prerequisites": [
+      [
+        ""
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "ECE260",
+    "name": "Continuous-Time Signals and Systems",
+    "prerequisites": [
+      [
+        "MATH101",
+        "MATH110"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "MATH122",
+    "name": "Logic and Foundations",
+    "prerequisites": [
+      [
+        "MATH100"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "SENG265",
+    "name": "Software Development Methods",
+    "prerequisites": [
+      [
+        "CSC115"
+      ],
+      [
+        "CSC116"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "STAT260",
+    "name": "Introduction to Probability and Statistics I",
+    "prerequisites": [
+      [
+        "MATH101"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "CSC225",
+    "name": "Algorithms and Data Structures I",
+    "prerequisites": [
+      [
+        "CSC115",
+        "MATH122"
+      ],
+      [
+        "CSC116",
+        "MATH122"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "ECON180",
+    "name": "Introduction to Economics and Financial Project Evaluation",
+    "prerequisites": [
+      [
+        "MATH101"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "SENG310",
+    "name": "Human Computer Interaction",
+    "prerequisites": [
+      [
+        "SENG265"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "CSC361",
+    "name": "Computer Communications and Networks",
+    "prerequisites": [
+      [
+        "SENG265",
+        "CSC230"
+      ],
+      [
+        "SENG265",
+        "ECE255"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring"
+    ]
+  },
+  {
+    "shorthand": "CSC226",
+    "name": "Algorithms and Data Structures II",
+    "prerequisites": [
+      [
+        "CSC225"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "ECE360",
+    "name": "Control Theory and Systems I",
+    "prerequisites": [
+      [
+        "ECE260"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring"
+    ]
+  },
+  {
+    "shorthand": "SENG321",
+    "name": "Requirements Engineering",
+    "prerequisites": [
+      [
+        "SENG265"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring"
+    ]
+  },
+  {
+    "shorthand": "ECE355",
+    "name": "Microprocessor-Based Systems",
+    "prerequisites": [
+      [
+        "MATH122",
+        "ECE255"
+      ],
+      [
+        "MATH122",
+        "CSC230"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall"
+    ]
+  },
+  {
+    "shorthand": "CSC355",
+    "name": "Digital Logic and Computer Organization",
+    "prerequisites": [
+      [
+        "MATH122",
+        "ECE255"
+      ],
+      [
+        "MATH122",
+        "CSC230"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall"
+    ]
+  },
+  {
+    "shorthand": "CSC320",
+    "name": "Foundations of Computer Science",
+    "prerequisites": [
+      [
+        "CSC226"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "CSC360",
+    "name": "Operating Systems",
+    "prerequisites": [
+      [
+        "CSC225",
+        "SENG265",
+        "CSC230"
+      ],
+      [
+        "CSC225",
+        "SENG265",
+        "ECE255"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "CSC370",
+    "name": "Database Systems",
+    "prerequisites": [
+      [
+        "CSC255",
+        "SENG265"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall",
+      "spring",
+      "summer"
+    ]
+  },
+  {
+    "shorthand": "SENG350",
+    "name": "Software Architecture and Design",
+    "prerequisites": [
+      [
+        "SENG275"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall"
+    ]
+  },
+  {
+    "shorthand": "SENG360",
+    "name": "Security Engineering",
+    "prerequisites": [
+      [
+        "SENG265",
+        "ECE363"
+      ],
+      [
+        "SENG265",
+        "CSC361"
+      ]
+    ],
+    "corequisites": [[]],
+    "terms_offered": [
+      "fall"
+    ]
+  }
+]
 body = {'year':'2023', 'term':'summer', 'courses':courses}
 response = requests.post(url, json = body, headers = {'Content-Type': 'application/json'})
 print(response.status_code)
