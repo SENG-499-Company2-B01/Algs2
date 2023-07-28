@@ -25,28 +25,60 @@ def filter_courses_by_term(courses, term):
             filtered_courses.append(course)
     return filtered_courses
 
+# Because sometimes courses are sent with "shorthand" and sometimes with "course"
+# This allows the module to read either
+def fix_course_and_shorthand(courses):
+    '''Takes courses in the following format:
+    [
+        {
+            "name": str, // e.g., “Fundamentals of Programming with Engineering Applications”
+            "course" or "shorthand": str, // e.g., “CSC111”
+            "prerequisites": str[][]
+            "corequisites": str[][]
+            “terms_offered”: str[] // “fall”, “spring”, “summer”
+        },
+        ...
+    ]
+    And returns the list of courses in the following format:
+    [
+        {
+            "name": str, // e.g., “Fundamentals of Programming with Engineering Applications”
+            "course": str, // e.g., “CSC111”
+            "shorthand": str, // e.g., “CSC111”
+            "prerequisites": str[][]
+            "corequisites": str[][]
+            “terms_offered”: str[] // “fall”, “spring”, “summer”
+        },
+        ...
+    ]'''
+    
+    for course in courses:
+        if "shorthand" not in course:
+            course["shorthand"] = course["course"]
+        if "course" not in course:
+            course["course"] = course["shorthand"]
+    return courses
+
+
 def reformat_courses(courses, year, term):
     '''Takes courses in the same format as the above function
     And returns the list of courses in the following format:
     [
         {
-            "Term": 202205,
-            "Subj": "ADMN",
-            "Num": "001",
-            "Sched Type": "Lec"
+            "term": "spring",
+            "year": 2023,
+            "course": "CSC110"
         },
         ...
     ]'''
     
-    formatted_term = year + _term_plain_to_code(term)
+    #formatted_term = year + _term_plain_to_code(term)
     reformatted_courses = []
     for course in courses:
-        subj, num = _shorthand_to_subj_and_num(course["shorthand"])
         reformatted_courses.append({
-            "Term": formatted_term,
-            "Subj": subj,
-            "Num": num,
-            "Sched Type": "LEC"
+            "term": term,
+            "year": year,
+            "course": course["shorthand"]
         })
     return reformatted_courses
 
@@ -116,11 +148,9 @@ def reformat_predictions(courses, predictions):
     And a list of courses in the following format:
     [
         {
-            "Term": 202205,
-            "Subj": "ADMN",
-            "Num": "001",
-            "Section": "W01",
-            "Sched Type": "LEC"
+            "term": "spring",
+            "year": 2023,
+            "course": "CSC110"
         },
         ...
     ]
@@ -135,11 +165,12 @@ def reformat_predictions(courses, predictions):
         ]
     }
     '''
+    print(predictions)
     result = {"estimates": []}
-    for course, prediction in zip(courses, predictions):
+    for course, (index, prediction) in zip(courses, predictions.iterrows()):
         result["estimates"].append({
-            "course": course["Subj"] + course["Num"],
-            "estimate": prediction,
+            "course": course["course"],
+            "estimate": prediction["predicted"],
         })
     return result
 

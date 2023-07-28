@@ -1,0 +1,2 @@
+CourseOffering,Predicted,term,year,Course,Actual,Error,AbsError,AbsPercentError
+ECE3552021-2,83.35,2,2021,ECE355,130,-46.650000000000006,46.650000000000006,0.35884615384615387

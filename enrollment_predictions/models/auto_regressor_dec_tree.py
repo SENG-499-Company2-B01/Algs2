@@ -1,16 +1,11 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import r2_score
-
-# Regressors
 from sklearn.ensemble import RandomForestRegressor
-# from lightgbm import LGBMRegressor
-# from sklearn.ensemble import GradientBoostingRegressor
-
-# Plotting
 if __name__ == "__main__":
     import matplotlib.patches as mpatches
     import matplotlib.pyplot as plt
@@ -30,32 +25,33 @@ def flatten_data(data):
         year = row["year"]
         terms = row["terms"]
 
+
         for term_data in terms:
             term = term_data["term"]
+
 
             course_enrollments = {}
             for course_data in term_data["courses"]:
                 course = course_data["course"]
                 sections = course_data["sections"]
 
+
                 total_enrollment = 0
                 for section_data in sections:
                     if section_data["num"].startswith('A'):
                         total_enrollment += section_data["enrolled"]
-                    num_seats = section_data["num_seats"]
-                    num = section_data["num"]
 
                 course_enrollments[course] = total_enrollment
+
 
             for course, enrollment in course_enrollments.items():
                 rows.append({
                     "year": year,
                     "term": term,
                     "course": course,
-                    "num_seats": num_seats,
-                    "section": num,
                     "enrolled": enrollment
                 })
+
 
     return pd.DataFrame(rows)
 
@@ -70,7 +66,7 @@ def load_enrollment_data(file_path):
         data (pd.DataFrame): The enrollment data
     """
     try:
-        return flatten_data(pd.read_json(file_path))
+        return pd.read_json(file_path)
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")
         return None
@@ -90,15 +86,13 @@ def data_preprocessing(data):
 
     data = data[data['subj'].isin(['SENG', 'CSC', 'ECE'])]
 
-    # Filter subjects not starting with A
-    data = data[data['section'].str.startswith(('A'))]
-
     # Create new features
     season_mapping = {
         'summer': 1,
         'fall': 2,
         'spring': 3
     }
+    
     data['term'] = data['term'].map(season_mapping)
     # Create unique identifier for each course offering
     data['CourseOffering'] = data['course'] + \
@@ -106,17 +100,14 @@ def data_preprocessing(data):
 
     # Map course to numerical values:
     # SENGXXX -> 1XXX, CSCXXX -> 2XXX, ECE -> 3XXX
-    subj_mapping = {'SENG': 1, 'CSC': 2, 'ECE': 3}
+    subj_mapping = {'SENG': 1000, 'CSC': 2000, 'ECE': 3000}
+    
     # Course number is the last 3 digits of the course
-    data['course'] = data['course'].str.extract(r'(\d+)')
-    data['course'] = data['course'].astype(int)
-    data['course'] = data['course'] + data['subj'].map(subj_mapping) * 1000
+    data['course'] = data['course'].str.extract(r'(\d+)').astype(int)
+    data['course'] = data['course'] + data['subj'].map(subj_mapping)
 
     # One-hot encode the categorical features
-    data = pd.get_dummies(data, columns=['subj', 'section'])
-
-    return data
-
+    data = pd.get_dummies(data, columns=['subj'])
 
 def remove_unnecessary_columns(data):
     # Drop unnecessary columns
@@ -149,6 +140,7 @@ def feature_engineering(data, window_sizes):
             lambda x: x.shift().rolling(window=win).std())
         data['ewm_{}'.format(win)] = course_groups['enrolled'].transform(
             lambda x: x.shift().ewm(span=win).mean())
+        
     return data
 
 
@@ -178,18 +170,7 @@ def prepare_data(data, first_year, train_end_year, predict_year):
         print(f"Warning: No validation data for year {predict_year}.")
         return None, None, None, None
 
-    # Apply feature engineering to the train and validation sets separately
-    #window_sizes = [2, 3, 6, 9]
-    
-    # Feature engineering doesn't seem to help
-    #window_sizes = []
-    #train_data = feature_engineering(train_data, window_sizes)
-    #val_data = feature_engineering(val_data, window_sizes)
-
-    train_data = remove_unnecessary_columns(train_data)
-    val_data = remove_unnecessary_columns(val_data)
-
-    exclude_columns = ['Year', 'Season', 'Enrolled']
+    exclude_columns = ['enrolled']
 
     train_features = train_data.columns[
         ~train_data.columns.isin(exclude_columns)]
@@ -198,20 +179,12 @@ def prepare_data(data, first_year, train_end_year, predict_year):
     val_features = val_data.columns[~val_data.columns.isin(exclude_columns)]
     val_target = ['enrolled', 'CourseOffering']
 
-    # Exclude 'CourseOffering' before imputation
     X_train = train_data[train_features].drop(columns=['CourseOffering'])
     X_val = val_data[val_features].drop(columns=['CourseOffering'])
 
-    # Impute missing values
     imp = SimpleImputer(keep_empty_features=True)
     X_train_imputed = imp.fit_transform(X_train)
     X_val_imputed = imp.transform(X_val)
-
-    # print(X_train_imputed.shape)
-    # print(len(X_train.columns))
-
-    # print(X_val_imputed.shape)
-    # print(len(X_val.columns))
 
     X_train_imputed = pd.DataFrame(X_train_imputed, columns=X_train.columns)
     train_target = train_data[train_target]
@@ -233,25 +206,24 @@ def model_training_grid_search(X_train, y_train, model):
         best_model (sklearn model): The best model
     """
     param_grid = {
-        'n_estimators': [9, 10, 11, 13, 15],
+        'n_estimators': [11, 13, 15, 18, 20, 25],
         'max_depth': [80, 85, 90, 95, 100],
-        'min_samples_split': [3, 4, 5, 6, 7, 8, 9, 10],
+        'min_samples_split': [1, 2, 3, 4, 5],
         'min_samples_leaf': [1, 2],
     }
     try:
         grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring='neg_mean_absolute_error', verbose=2, n_jobs=-1)
         grid_search.fit(X_train, y_train['enrolled'])
-
         best_model = grid_search.best_estimator_
         print("Best Parameters: ", grid_search.best_params_)
 
         return best_model
     except Exception as e:
         print("Error occurred during model training:", str(e))
-        return None
+        return best_model
 
 
-def model_training(X_train, y_train, model):
+def model_training(X_train, y_train, model=RandomForestRegressor()):
     """ This function trains the model
 
     Args:
@@ -262,6 +234,7 @@ def model_training(X_train, y_train, model):
     Returns:
         model (sklearn model): The trained model
     """
+    
     try:
         model.fit(X_train, y_train['enrolled'])
         return model
@@ -295,7 +268,6 @@ def model_evaluation(model, X_val, y_val):
     return predictions_df, mae, rmse, r2
 
 
-
 def plot_results(pred_df, y_val, predict_year):
     """ This function plots the results
 
@@ -325,6 +297,20 @@ def plot_results(pred_df, y_val, predict_year):
     plt.show()
 
 
+def calc_results(pred_df, y_val):
+    pred_df['term'] = pred_df['CourseOffering'].str[-1]
+    pred_df['year'] = pred_df['CourseOffering'].str[-6:-2]
+    pred_df['year'] = pred_df['year'].astype(int)
+    pred_df['Course'] = pred_df['CourseOffering'].str[:-6]
+    pred_df['Actual'] = y_val['enrolled']
+
+    pred_df['Error'] = pred_df['Predicted'] - pred_df['Actual']
+    pred_df['AbsError'] = pred_df['Error'].abs()
+    pred_df['AbsPercentError'] = pred_df['AbsError'] / pred_df['Actual']
+
+    return pred_df
+
+
 def run_prediction_for_year(data, first_year, train_end_year):
     """ This function runs the prediction for a given year
 
@@ -348,25 +334,15 @@ def run_prediction_for_year(data, first_year, train_end_year):
         print("Error: The training data is not sorted in chronological order.")
         return None, None, None
 
-    regressor = RandomForestRegressor(
-        n_estimators=13, max_depth=90, min_samples_split=3, min_samples_leaf=1)
-    # regressor = RandomForestRegressor()
-    # regressor = GradientBoostingRegressor()
-    # regressor = LGBMRegressor()
-    model = model_training(X_train, y_train, model=regressor)
-
-    # For hyperparameter tuning
-    # model = model_training_grid_search(X_train, y_train, model=regressor)
-
+    model = model_training(X_train, y_train, model=RandomForestRegressor())
     if model is None:
         print("Error: Failed during model training.")
         return None, None, None
-    
+
     pred_df, mae, rmse, r2 = model_evaluation(model, X_val, y_val)
     print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}, R^2 = {r2}')
 
     return pred_df, y_val, predict_year
-
 
 def enrollment_predictions(train_data, X) -> pd.DataFrame:
     """ This function predicts the enrollment for the given data
@@ -404,26 +380,53 @@ def enrollment_predictions(train_data, X) -> pd.DataFrame:
 
     return predictions
 
-
 def main():
     enrollment_data_path = "./data/client_data/schedules.json"
     data = load_enrollment_data(enrollment_data_path)
     if data is None or data.empty:
         print("Error: Empty data or failed to load data.")
         return
+    data = flatten_data(data)
+    if data is None or data.empty:
+        print("Error flattening data")
+        return
     data = data_preprocessing(data)
     if data is None or data.empty:
         print("Error: Failed during data preprocessing.")
         return
 
+    results = {}
+
     first_year = data['year'].min()
     last_year = data['year'].max()
-    for train_end_year in range(first_year, last_year):
+    # for train_end_year in range(last_year-1, last_year):
+    for train_end_year in range(first_year+1, last_year):
         pred_df, y_val, predict_year = run_prediction_for_year(
             data, first_year, train_end_year)
 
         if pred_df is not None:
-            plot_results(pred_df, y_val, predict_year)
+            # plot_results(pred_df, y_val, predict_year)
+            results[predict_year] = calc_results(pred_df, y_val)
+
+    courses_stats = {}
+    for year in results:
+        for index, course in results[year].iterrows():
+            course_name = course['Course']
+            if course_name not in courses_stats:
+                courses_stats[course_name] = [course]
+            else:
+                courses_stats[course_name].append(course)
+    
+    # Save results to csv and get total stats
+    sum = {}
+    for course in courses_stats:
+        course_df = pd.DataFrame(courses_stats[course])
+        course_df.to_csv(f'./data/results/{course}.csv', index=False)
+        sum[course] = course_df['AbsPercentError'].sum() / len(course_df)
+
+    # Save total stats to csv
+    sum_df = pd.DataFrame.from_dict(sum, orient='index', columns=['AbsPercentError'])
+    sum_df.to_csv('./data/results/total.csv', index=True)
 
 
 if __name__ == "__main__":
