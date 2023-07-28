@@ -289,12 +289,15 @@ def main():
         all_courses = json.load(fh)
 
     courses_squared_error = {}
+    courses_results = {}
+    for course in all_courses:
+        courses_results[course["shorthand"]] = []
     for predict_year in range(2012, 2024): 
         sqaured_error = 0
         count = 0
         for term in ["spring", "summer", "fall"]:
-            print(predict_year, term)
-            print("====================================")
+            #print(predict_year, term)
+            #print("====================================")
             formatted_schedules = reformat_schedules(schedules, predict_year, term)
             predictions = predict(predict_year, term, all_courses, schedules)
 
@@ -306,6 +309,15 @@ def main():
                     actual = formatted_schedules[predict_year][term][course]
                 except KeyError as e:
                     continue
+                courses_results[course].append(f"{course}{predict_year}-{season_mapping[term]}") # Course Offering
+                courses_results[course].append(estimate) # Predicted
+                courses_results[course].append(season_mapping[term]) # term
+                courses_results[course].append(predict_year) # year
+                courses_results[course].append(course) # Course
+                courses_results[course].append(actual) # Actual
+                courses_results[course].append(estimate - actual) # Error
+                courses_results[course].append(abs(estimate - actual)) # AbsError
+                courses_results[course].append(abs(estimate/actual - 1)) # AbsPercentError
                 sqaured_error += (estimate - actual)**2
                 count += 1
                 try:
@@ -313,18 +325,42 @@ def main():
                     courses_squared_error[course+" "+term]["count"] += 1
                 except KeyError as e:
                     courses_squared_error[course+" "+term] = {"total": (estimate - actual)**2, "count": 1}
-                print(course, term, estimate, actual)
+                #print(course, term, estimate, actual)
         if count == 0:
             continue
 
         # Metrics for each predict year
         rmse = (sqaured_error/count)**0.5
-        print(f"{predict_year} - RMSE {rmse}")
+        #print(f"{predict_year} - RMSE {rmse}")
     
     # Metrics for individual courses
     for course, val in courses_squared_error.items():
         rmse = (val["total"]/val["count"])**0.5
-        print(f"{course} - RMSE {rmse}")
+        #print(f"{course} - RMSE {rmse}")
+    
+    # Create results files
+    counts = {}
+    for course, results in courses_results.items():
+        counts[course] = len(results)/9
+        df = pd.DataFrame({
+            "CourseOffering": results[0::9],
+            "Predicted": results[1::9],
+            "term": results[2::9],
+            "year": results[3::9],
+            "course": results[4::9],
+            "Actual": results[5::9],
+            "Error": results[6::9],
+            "AbsError": results[7::9],
+            "AbsPercentError": results[8::9]
+        })
+        df.to_csv(f"./data/results/{course}-p.csv", index=False)
+    print(counts)
+
+season_mapping = {
+        'summer': 1,
+        'fall': 2,
+        'spring': 3
+    }
 
 if __name__ == "__main__":
     main()
