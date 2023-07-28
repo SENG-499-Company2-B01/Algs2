@@ -30,9 +30,6 @@ def predict(request):
 
     with open('data/client_data/schedules2.json', 'r', encoding='utf-8') as fh:
         historic_schedules = json.load(fh)
-    
-    # Reformat schedules for prediction
-    #historic_schedules = utils.reformat_schedules(historic_schedules)
 
     # Get courses from request
     courses = data.get('courses')
@@ -47,6 +44,11 @@ def predict(request):
     courses = utils.fix_course_and_shorthand(courses)
     courses = utils.filter_courses_by_term_and_subj(courses, term)
     courses = utils.reformat_courses(courses, year, term)
+    
+    # Fitler out courses with no data
+    formatted_historic_schedules = utils.reformat_schedules(historic_schedules)
+    course_names = [course["Course"] for course in  formatted_historic_schedules]
+    courses = utils.filter_courses_by_name(courses, course_names)
 
     """# Perform prediction
     predictions = enrollment_predictions(historic_schedules, courses)
