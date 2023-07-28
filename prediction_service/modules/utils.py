@@ -5,7 +5,7 @@ class InvalidTermError(Exception):
         self.message = message
         super().__init__(self.message + f': {self.term}')
 
-def filter_courses_by_term(courses, term):
+def filter_courses_by_term_and_subj(courses, term):
     '''Takes courses in the following format:
     [
         {
@@ -21,7 +21,7 @@ def filter_courses_by_term(courses, term):
     
     filtered_courses = []
     for course in courses:
-        if term in course["terms_offered"]:
+        if term in course["terms_offered"] and (course["shorthand"].startswith("CSC") or course["shorthand"].startswith("SENG") or course["shorthand"].startswith("ECE")):
             filtered_courses.append(course)
     return filtered_courses
 
