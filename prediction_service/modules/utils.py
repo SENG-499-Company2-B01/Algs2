@@ -5,6 +5,26 @@ class InvalidTermError(Exception):
         self.message = message
         super().__init__(self.message + f': {self.term}')
 
+def filter_courses_by_name(courses, names):
+    '''Takes courses in the following format:
+    [
+        {
+            "name": str, // e.g., “Fundamentals of Programming with Engineering Applications”
+            "shorthand": str, // e.g., “CSC111”
+            "prerequisites": str[][] // e.g., [[“CSC111”, “CSC115”], [“CSC116”]]
+            "corequisites": str[][] // e.g., [[“CSC111”, “CSC115”], [“CSC116”]]
+            “terms_offered”: str[] // “fall”, “spring”, “summer”
+        },
+        ...
+    ]
+    And returns the list of courses that have the given names'''
+    
+    filtered_courses = []
+    for course in courses:
+        if course["course"] in names:
+            filtered_courses.append(course)
+    return filtered_courses
+
 def filter_courses_by_term_and_subj(courses, term):
     '''Takes courses in the following format:
     [
@@ -137,6 +157,7 @@ def reformat_schedules(schedules):
                 courses.append({
                     "Term": str(schedule["year"]) + _term_plain_to_code(term["term"]),
                     "Subj": subj,
+                    "Course": course["course"],
                     "Num": num,
                     "Sched Type": "LEC",
                     "Enrolled": enrolled
