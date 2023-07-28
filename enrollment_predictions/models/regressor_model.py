@@ -1,12 +1,50 @@
 import pandas as pd
 import numpy as np
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+from sklearn.preprocessing import LabelEncoder
+
+def flatten_data(data):
+    """ This function flattens the nested JSON data into a flat dataframe
+
+    Args:
+        data (pd.DataFrame): The JSON data
+    """
+    rows = []
+    for _, row in data.iterrows():
+        year = row["year"]
+        terms = row["terms"]
+
+        for term_data in terms:
+            term = term_data["term"]
+
+            course_enrollments = {}
+            for course_data in term_data["courses"]:
+                course = course_data["course"]
+                sections = course_data["sections"]
+
+                total_enrollment = 0
+                for section_data in sections:
+                    if section_data["num"].startswith('A'):
+                        total_enrollment += section_data["enrolled"]
+
+                course_enrollments[course] = total_enrollment
+
+            for course, enrollment in course_enrollments.items():
+                rows.append({
+                    "year": year,
+                    "term": term,
+                    "course": course,
+                    "enrolled": enrollment
+                })
+
+    return pd.DataFrame(rows)
 
 
-def data_preprocessing(data, included_subjects=['SENG', 'CSC', 'ECE']):
+def data_preprocessing(data, predict_data, included_subjects=['SENG', 'CSC', 'ECE']):
     """
     Preprocesses the data by filtering, creating unique identifiers, 
     mapping categorical variables to numerical, and one-hot encoding.
@@ -20,19 +58,31 @@ def data_preprocessing(data, included_subjects=['SENG', 'CSC', 'ECE']):
     """
     # Filter data
     data['subj'] = data['course'].str.extract(r'([a-zA-Z]+)')
+    predict_data['subj'] = predict_data['course'].str.extract(r'([a-zA-Z]+)')
     data = data[data['subj'].isin(included_subjects)]
+    predict_data = predict_data[predict_data['subj'].isin(included_subjects)]
 
     # Create unique identifier for each course offering
-    data['offering'] = data['course'] + data['year'].astype(str) + "-" + data['term'].astype(str)
+    data['offering'] = data['course'] + "-" + data['year'].astype(str) + "-" + data['term'].astype(str)
+    predict_data['offering'] = predict_data['course'] + "-" + predict_data['year'].astype(str) + "-" + predict_data['term'].astype(str)
 
     # Turn terms into numerical values
     season_mapping = {'summer': 1, 'fall': 2, 'spring': 3}
     data['term'] = data['term'].map(season_mapping)
+    predict_data['term'] = predict_data['term'].map(season_mapping)
 
-    # One-hot encode the categorical features
-    data = pd.get_dummies(data, columns=['subj', 'course'])
+    # Label encode the categorical features
+    le_subj = LabelEncoder()
+    le_course = LabelEncoder()
+    le_subj.fit(data['subj'])
+    le_course.fit(data['course'])
+    # Transform the training data
+    data['subj'] = le_subj.transform(data['subj'])
+    data['course'] = le_course.transform(data['course'])
+    predict_data['subj'] = le_subj.transform(predict_data['subj'])
+    predict_data['course'] = le_course.transform(predict_data['course'])
 
-    return data
+    return data, predict_data
 
 
 def handle_missing_data(data):
@@ -59,11 +109,10 @@ def handle_missing_data(data):
 
     # Get y (enrolled and offering)
     y = data[['enrolled', 'offering']]
-
     return X_imputed, y
 
 
-def model_training(X_train, y_train, model):
+def model_training(X_train, y_train, model=RandomForestRegressor()):
     """
     Trains the given model with the provided training data.
 
@@ -83,7 +132,7 @@ def model_training(X_train, y_train, model):
         return None
 
 
-def model_predict(model, X_predict, offerings):
+def model_predict(model, X_predict):
     """
     Makes predictions using the trained model.
 
@@ -96,10 +145,19 @@ def model_predict(model, X_predict, offerings):
         pd.DataFrame: A dataframe containing the course offerings and the 
         corresponding predictions.
     """
+    offerings = X_predict['offering']
+    split_offerings = offerings.str.split('-')
+    courses = [offering[0] for offering in split_offerings]
+    features = X_predict.columns.difference(['offering'])
+
+    # Exclude 'offering' before imputation
+    X_predict= X_predict.loc[:, features]
+
     y_pred = model.predict(X_predict)
+    y_pred = np.round(y_pred, 0).astype(int)
 
     predictions_df = pd.DataFrame({
-        'offering': offerings,
+        'course': courses,
         'predicted': y_pred
     })
 
