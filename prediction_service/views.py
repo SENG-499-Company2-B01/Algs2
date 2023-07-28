@@ -28,7 +28,7 @@ def predict(request):
     historic_schedules = api.request_historic_schedules()
     """
 
-    with open('data/client_data/schedules.json', 'r', encoding='utf-8') as fh:
+    with open('data/client_data/schedules2.json', 'r', encoding='utf-8') as fh:
         historic_schedules = json.load(fh)
     
     # Reformat schedules for prediction
@@ -45,7 +45,7 @@ def predict(request):
     for course in courses:
         course["terms_offered"] = [utils.reformat_term(term) for term in course["terms_offered"]]
     courses = utils.fix_course_and_shorthand(courses)
-    courses = utils.filter_courses_by_term(courses, term)
+    courses = utils.filter_courses_by_term_and_subj(courses, term)
     courses = utils.reformat_courses(courses, year, term)
 
     """# Perform prediction
