@@ -12,21 +12,26 @@ def main():
     # Parse data
     schedules = {}
     for course in courses:
+        # Check if course is a lecture
         if course["Sched Type"] != "LEC":
             continue
 
+        # Add year to schedules dictionary
         year = course["Term"][:4]
         if year not in schedules:
             schedules[year] = {"year": int(year), "terms": {}}
         
+        # Add term to schedules dictionary
         term = term_code_to_plain(course["Term"][4:])
         if term not in schedules[year]["terms"]:
             schedules[year]["terms"][term] = {"term": term, "courses": {}}
         
+        # Add course to schedules dictionary
         subj = course["SubjNum"]
         if subj not in schedules[year]["terms"][term]["courses"]:
             schedules[year]["terms"][term]["courses"][subj] = {"course": subj, "sections": []}
         
+        # Add section to schedules dictionary
         schedules[year]["terms"][term]["courses"][subj]["sections"].append({
             "num": course["Section"],
             "building": course["building"],
@@ -45,11 +50,12 @@ def main():
         schedules[year]["terms"] = list(schedules[year]["terms"].values())
     schedules = list(schedules.values())
         
+    # Write the schedules to a json file
     json_file = path+'schedules.json'
     with open(json_file, 'w', encoding='utf-8') as f:
         json.dump(schedules, f, ensure_ascii=False, indent=4)
     
-
+# Convert term code to plain text
 def term_code_to_plain(term):
     if term == '01':
         return 'spring'

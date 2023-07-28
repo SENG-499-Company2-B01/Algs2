@@ -16,6 +16,9 @@ def flatten_data(data):
 
     Args:
         data (pd.DataFrame): The JSON data
+
+    Returns:
+        data (pd.DataFrame): The flattened data
     """
     rows = []
     for _, row in data.iterrows():
@@ -54,6 +57,14 @@ def flatten_data(data):
 
 
 def load_enrollment_data(file_path):
+    """ This function loads the enrollment data from the JSON file and flattens it into a dataframe
+    
+    Args:
+        file_path (str): The path to the JSON file
+
+    Returns:
+        data (pd.DataFrame): The enrollment data
+    """
     try:
         return pd.read_json(file_path)
     except FileNotFoundError:
@@ -62,6 +73,14 @@ def load_enrollment_data(file_path):
 
 
 def data_preprocessing(data):
+    """ This function performs data preprocessing on the enrollment data
+
+    Args:
+        data (pd.DataFrame): The enrollment data
+
+    Returns:
+        data (pd.DataFrame): The enrollment data with the new features
+    """
     # Filter data
     data['subj'] = data['course'].str.extract(r'([a-zA-Z]+)')
 
@@ -89,11 +108,27 @@ def data_preprocessing(data):
 
     # One-hot encode the categorical features
     data = pd.get_dummies(data, columns=['subj'])
-
+    
     return data
 
 
 def prepare_data(data, first_year, train_end_year, predict_year):
+    """ This function prepares the data for training and validation
+
+    Args:
+        data (pd.DataFrame): The enrollment data
+        first_year (int): The first year of the training data
+        train_end_year (int): The last year of the training data
+        predict_year (int): The year to predict
+
+    Returns:
+        X_train_imputed (pd.DataFrame): The training data
+        train_target (pd.DataFrame): The training target
+        X_val_imputed (pd.DataFrame): The validation data
+        val_target (pd.DataFrame): The validation target
+    """
+
+    # Perform train-test split
     train_data = data[(
         data['year'] >= first_year) & (data['year'] <= train_end_year)].copy()
 
@@ -128,6 +163,16 @@ def prepare_data(data, first_year, train_end_year, predict_year):
 
 
 def model_training_grid_search(X_train, y_train, model):
+    """ This function performs hyperparameter tuning on the model
+    
+    Args:
+        X_train (pd.DataFrame): The training data
+        y_train (pd.DataFrame): The training target
+        model (sklearn model): The model to train
+
+    Returns:
+        best_model (sklearn model): The best model
+    """
     param_grid = {
         'n_estimators': [11, 13, 15, 18, 20, 25],
         'max_depth': [80, 85, 90, 95, 100],
@@ -147,6 +192,17 @@ def model_training_grid_search(X_train, y_train, model):
 
 
 def model_training(X_train, y_train, model=RandomForestRegressor()):
+    """ This function trains the model
+
+    Args:
+        X_train (pd.DataFrame): The training data
+        y_train (pd.DataFrame): The training target
+        model (sklearn model): The model to train
+
+    Returns:
+        model (sklearn model): The trained model
+    """
+    
     try:
         model.fit(X_train, y_train['enrolled'])
         return model
@@ -156,6 +212,19 @@ def model_training(X_train, y_train, model=RandomForestRegressor()):
 
 
 def model_evaluation(model, X_val, y_val):
+    """ This function evaluates the model
+
+    Args:
+        model (sklearn model): The trained model
+        X_val (pd.DataFrame): The validation data
+        y_val (pd.DataFrame): The validation target
+
+    Returns:
+        predictions_df (pd.DataFrame): The predictions
+        mae (float): The mean absolute error
+        rmse (float): The root mean squared error
+        r2 (float): The R^2 score
+    """
     y_pred = model.predict(X_val)
     predictions_df = pd.DataFrame({
         'CourseOffering': y_val['CourseOffering'],
@@ -168,6 +237,13 @@ def model_evaluation(model, X_val, y_val):
 
 
 def plot_results(pred_df, y_val, predict_year):
+    """ This function plots the results
+
+    Args:
+        pred_df (pd.DataFrame): The predictions
+        y_val (pd.DataFrame): The validation target
+        predict_year (int): The year to predict
+    """
     plt.figure(figsize=(18, 10))
     courses = pred_df['CourseOffering'].unique()
     for i, course in enumerate(courses):
@@ -204,6 +280,18 @@ def calc_results(pred_df, y_val):
 
 
 def run_prediction_for_year(data, first_year, train_end_year):
+    """ This function runs the prediction for a given year
+
+    Args:
+        data (pd.DataFrame): The enrollment data
+        first_year (int): The first year of the training data
+        train_end_year (int): The last year of the training data
+
+    Returns:
+        pred_df (pd.DataFrame): The predictions
+        y_val (pd.DataFrame): The validation target
+        predict_year (int): The year to predict
+    """
     predict_year = train_end_year + 1
     X_train, y_train, X_val, y_val = \
         prepare_data(data, first_year, train_end_year, predict_year)
@@ -223,7 +311,6 @@ def run_prediction_for_year(data, first_year, train_end_year):
     print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}, R^2 = {r2}')
 
     return pred_df, y_val, predict_year
-
 
 def main():
     enrollment_data_path = "./data/client_data/schedules.json"

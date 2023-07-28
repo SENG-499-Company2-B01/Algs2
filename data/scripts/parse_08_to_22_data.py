@@ -10,11 +10,13 @@ path = os.path.join(current_path, "../client_data/")
 with open(path+'banner_200805_202205.json', 'r', encoding='utf-8') as fh:
     obj = json.load(fh)
 
+# Dictionary to convert term code to term name
 terms = {
     '01': 'spring', 
     '05': 'summer', 
     '09': 'fall'
 }
+# Dictionary to convert schedule type to 3 letter code
 sched_types = {
     'Lecture': 'LEC',
     'Lab': 'LAB',
@@ -34,25 +36,29 @@ for course in courses_json:
 
 courses = []
 broken_courses = []
+
+# Loop through each course in the json file
 for item in obj:
     if item is None: 
         continue
     subj = item["subject"]
-    # if subj in ["ECE", "SENG", "CSC"]:
+    # Check if the course is in the list of courses to include
     if subj + item["courseNumber"] in courses_to_include:
         sched_type = item["scheduleTypeDescription"]
+        # Check if course has the needed information
         if len(item["meetingsFaculty"]) > 0:
             fac = item["meetingsFaculty"][0]
-            # for fac in item["meetingsFaculty"]:
             building = fac["meetingTime"]['buildingDescription']
             if building is not None and fac["meetingTime"]['room'] is not None:
                 building += ' ' + fac["meetingTime"]['room']
 
+            # Get professor name if it exists
             if len(item['faculty']) > 0:
                 prof = item['faculty'][0]['displayName']
             else:
                 prof = None
 
+            # Get days of the week the course is on
             days = []
             if fac["meetingTime"]["monday"]:
                 days.append("M")
@@ -64,6 +70,7 @@ for item in obj:
                 days.append("R")
             if fac["meetingTime"]["friday"]:
                 days.append("F")
+            # Add all the information to a dictionary to be added to the courses list
             course_entry = {
                 "Term": item["term"],
                 "SubjNum": item["subjectCourse"],
@@ -91,14 +98,13 @@ for item in obj:
                     courses.append(course_entry)
             else:
                 courses.append(course_entry)
-        # else:
-        # Maybe add without time + day
-        #     print(item["subjectCourse"])
 
+# Write the courses list to a json file
 json_file = 'Course_Summary_2008_2022.json'
 with open(path+json_file, 'w', encoding='utf-8') as f:
     json.dump(courses, f, ensure_ascii=False, indent=4)
     
+# Write the broken courses list to a json file
 json_file = 'Broken_Course_Summary_2008_2022.json'
 with open(path+json_file, 'w', encoding='utf-8') as f:
     json.dump(broken_courses, f, ensure_ascii=False, indent=4)
