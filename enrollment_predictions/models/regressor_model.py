@@ -5,6 +5,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+from sklearn.preprocessing import LabelEncoder
 
 def flatten_data(data):
     """ This function flattens the nested JSON data into a flat dataframe
@@ -43,7 +44,7 @@ def flatten_data(data):
     return pd.DataFrame(rows)
 
 
-def data_preprocessing(data, included_subjects=['SENG', 'CSC', 'ECE']):
+def data_preprocessing(data, predict_data, included_subjects=['SENG', 'CSC', 'ECE']):
     """
     Preprocesses the data by filtering, creating unique identifiers, 
     mapping categorical variables to numerical, and one-hot encoding.
@@ -57,19 +58,31 @@ def data_preprocessing(data, included_subjects=['SENG', 'CSC', 'ECE']):
     """
     # Filter data
     data['subj'] = data['course'].str.extract(r'([a-zA-Z]+)')
+    predict_data['subj'] = predict_data['course'].str.extract(r'([a-zA-Z]+)')
     data = data[data['subj'].isin(included_subjects)]
+    predict_data = predict_data[predict_data['subj'].isin(included_subjects)]
 
     # Create unique identifier for each course offering
     data['offering'] = data['course'] + "-" + data['year'].astype(str) + "-" + data['term'].astype(str)
+    predict_data['offering'] = predict_data['course'] + "-" + predict_data['year'].astype(str) + "-" + predict_data['term'].astype(str)
 
     # Turn terms into numerical values
     season_mapping = {'summer': 1, 'fall': 2, 'spring': 3}
     data['term'] = data['term'].map(season_mapping)
+    predict_data['term'] = predict_data['term'].map(season_mapping)
 
-    # One-hot encode the categorical features
-    data = pd.get_dummies(data, columns=['subj', 'course'])
+    # Label encode the categorical features
+    le_subj = LabelEncoder()
+    le_course = LabelEncoder()
+    le_subj.fit(data['subj'])
+    le_course.fit(data['course'])
+    # Transform the training data
+    data['subj'] = le_subj.transform(data['subj'])
+    data['course'] = le_course.transform(data['course'])
+    predict_data['subj'] = le_subj.transform(predict_data['subj'])
+    predict_data['course'] = le_course.transform(predict_data['course'])
 
-    return data
+    return data, predict_data
 
 
 def handle_missing_data(data):
@@ -96,7 +109,6 @@ def handle_missing_data(data):
 
     # Get y (enrolled and offering)
     y = data[['enrolled', 'offering']]
-
     return X_imputed, y
 
 
@@ -142,6 +154,7 @@ def model_predict(model, X_predict):
     X_predict= X_predict.loc[:, features]
 
     y_pred = model.predict(X_predict)
+    y_pred = np.round(y_pred, 0).astype(int)
 
     predictions_df = pd.DataFrame({
         'course': courses,

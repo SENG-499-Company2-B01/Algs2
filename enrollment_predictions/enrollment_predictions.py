@@ -19,7 +19,7 @@ def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.Data
     """
 
     train_data = flatten_data(train_data)
-    train_data = data_preprocessing(train_data)
+    train_data, X = data_preprocessing(train_data, X)
     if train_data is None or train_data.empty:
         print("Error: Failed during data preprocessing.")
         return
@@ -38,8 +38,6 @@ def enrollment_predictions(train_data: pd.DataFrame, X: pd.DataFrame) -> pd.Data
         print("Error: Failed during model training.")
         return None
     
-    X = data_preprocessing(X)
-    print(X)
     pred = model_predict(model, X)
     if pred is None:
         print("Error: Failed during model prediction.")

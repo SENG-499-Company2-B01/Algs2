@@ -50,14 +50,15 @@ def predict(request):
 
     """# Perform prediction
     predictions = enrollment_predictions(historic_schedules, courses)
-
-    # Reformate predictions
-    predictions = utils.reformat_predictions(courses, predictions)"""
+    """
 
     #try:
     historic_schedules = pd.DataFrame(historic_schedules)
     courses_df = pd.DataFrame(courses)
     predictions = enrollment_predictions(historic_schedules, courses_df)
+    # Reformate predictions
+    predictions = utils.reformat_predictions(courses, predictions)
+
     """
     except Exception as e:
         return HttpResponse(f"Error calculating course predictions {e}", status=400)

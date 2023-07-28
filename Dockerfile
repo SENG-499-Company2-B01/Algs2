@@ -12,14 +12,18 @@ ENV PORT 8000
 # Set work directory
 WORKDIR /usr/src/app
 
-# Copy current directory to the working directory
-COPY . /usr/src/app/
-
-# Install any needed packages specified in requirements.txt
 RUN apt-get update && apt-get install -y \
     gcc \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir -r requirements.txt
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements to the working directory
+COPY ./requirements.txt /usr/src/app/
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy current directory to the working directory
+COPY . /usr/src/app/
 
 # Run the command to start uWSGI
 CMD ["uwsgi", "--http", ":8000", "--wsgi-file", "prediction_service/wsgi.py", "--enable-threads"]

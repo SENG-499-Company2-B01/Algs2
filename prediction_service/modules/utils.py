@@ -167,10 +167,10 @@ def reformat_predictions(courses, predictions):
     '''
     print(predictions)
     result = {"estimates": []}
-    for course, prediction in zip(courses, predictions):
+    for course, (index, prediction) in zip(courses, predictions.iterrows()):
         result["estimates"].append({
             "course": course["course"],
-            "estimate": prediction,
+            "estimate": prediction["predicted"],
         })
     return result
 
