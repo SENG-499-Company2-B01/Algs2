@@ -31,13 +31,10 @@ for year in sufficient_years:
             if len(data) == 0:
                 #print(f"No data point for {year} {term} {course}")
                 continue
-            
+
             actual = data["Actual"].iloc[0]
             predicted = data["Predicted"].iloc[0]
             percent_error_ = data["AbsPercentError"].iloc[0]
-            if percent_error_ > 0.5:
-                print(f"{year} {term} {course} {percent_error_}")
-                continue
             percent_error += percent_error_
             count += 1
             year_data[f"{course}-{term_map[term]}"] = (actual, predicted)
@@ -66,4 +63,3 @@ for year in sufficient_years:
     # Show the plot
     plt.tight_layout()
     plt.show()
-    
