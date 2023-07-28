@@ -108,39 +108,7 @@ def data_preprocessing(data):
 
     # One-hot encode the categorical features
     data = pd.get_dummies(data, columns=['subj'])
-
-def remove_unnecessary_columns(data):
-    # Drop unnecessary columns
-    # data.drop(columns=['subj', 'section'], inplace=True)
-    return data
-
-
-def feature_engineering(data, window_sizes):
-    """ This function performs feature engineering on the enrollment data
-
-    Args:
-        data (pd.DataFrame): The enrollment data
-        window_sizes (list): The window sizes to use for the rolling window
     
-    Returns:
-        data (pd.DataFrame): The enrollment data with the new features
-    """
-    course_groups = data.groupby('CourseOffering')
-
-    for win in window_sizes:
-        data['mean_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).mean())
-        data['median_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).median())
-        data['min_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).min())
-        data['max_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).max())
-        data['std_prev_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().rolling(window=win).std())
-        data['ewm_{}'.format(win)] = course_groups['enrolled'].transform(
-            lambda x: x.shift().ewm(span=win).mean())
-        
     return data
 
 
@@ -343,42 +311,6 @@ def run_prediction_for_year(data, first_year, train_end_year):
     print(f'For prediction year {predict_year}: MAE = {mae}, RMSE = {rmse}, R^2 = {r2}')
 
     return pred_df, y_val, predict_year
-
-def enrollment_predictions(train_data, X) -> pd.DataFrame:
-    """ This function predicts the enrollment for the given data
-
-    Args:
-        train_data (pd.DataFrame): Training data to train the model
-        X (pd.DataFrame): Data to predict on
-
-    Returns:
-        pd.DataFrame: Predicted enrollment values
-    """
-
-    train_data = train_data.copy()
-    train_data = data_preprocessing(train_data)
-    if train_data is None or train_data.empty:
-        print("Error: Failed during data preprocessing.")
-        return
-
-    # Verify that predict data is for one year after last train data
-    if train_data['year'].max() + 1 != X['year'].min():
-        print("Error: Predict data is not for one year after last train data.")
-        return None
-
-    # Verify that predict data is for one year only
-    if X['year'].nunique() != 1:
-        print("Error: Predict data is not for one year only.")
-        return None
-
-    # Verify that predict data is for three terms
-    if X['term'].nunique() != 3:
-        print("Error: Predict data is not for three terms.")
-        return None
-
-    predictions, _, _ = run_prediction_for_year(train_data, train_data['year'].min(), train_data['year'].max())
-
-    return predictions
 
 def main():
     enrollment_data_path = "./data/client_data/schedules.json"
