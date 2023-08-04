@@ -5,6 +5,19 @@ from enrollment_predictions.enrollment_predictions import enrollment_predictions
 import json
 import pandas as pd
 
+loc_missing_template = {
+    "loc": [],
+    "msg": "field required",
+    "type": "value_error.missing"
+}
+
+loc_term_template = {
+    "loc": ["body", "term"],
+    "msg":"value is not a valid enumeration member; permitted: 'spring', 'summer', 'fall'",
+    "type":"type_error.enum",
+    "ctx":{"enum_values":["spring","summer","fall"]}
+}
+
 def predict(request):
     # Check that request is a POST request
     if request.method != 'POST':
@@ -12,32 +25,42 @@ def predict(request):
 
     # Check that year and term are correctly provided
     body = request.body.decode('utf-8')
-    data = json.loads(body)
+    try:
+        data = json.loads(body)
+    except:
+        return HttpResponse("Error with JSON body", status=422)
+
+    error_template = {
+        "detail": []
+    }
     
-    year = str(data.get('year'))
+    year = data.get('year')
     term = utils.reformat_term(data.get('term'))
     if not year:
-        return HttpResponse("year is required", status=400)
+        loc = loc_missing_template.copy()
+        loc["loc"] = ["body", "year"]
+        error_template["detail"].append(loc)
+    year = str(year)
     if not term:
-        return HttpResponse("term is required", status=400)
-    if not term in ["fall", "spring", "summer"]:
-        return HttpResponse("term must be fall, spring, or summer", status=400)
-
-    """
-    # Get historic schedules from backend
-    historic_schedules = api.request_historic_schedules()
-    """
+        loc = loc_missing_template.copy()
+        loc["loc"] = ["body", "term"]
+        error_template["detail"].append(loc)
+    elif not term in ["fall", "spring", "summer"]:
+        error_template["detail"].append(loc_term_template)
 
     with open('data/client_data/schedules2.json', 'r', encoding='utf-8') as fh:
         historic_schedules = json.load(fh)
-
+    
     # Get courses from request
     courses = data.get('courses')
     if not courses:
-        return HttpResponse("courses to predict are required", status=400)
-    ## Get courses from backend
-    ## courses = api.request_courses()
-
+        loc = loc_missing_template.copy()
+        loc["loc"] = ["body", "courses"]
+        error_template["detail"].append(loc)
+    
+    if (len(error_template["detail"]) > 0):
+        return JsonResponse(error_template, status=422)
+    
     # Reformat courses for prediction
     for course in courses:
         course["terms_offered"] = [utils.reformat_term(term) for term in course["terms_offered"]]
@@ -50,21 +73,11 @@ def predict(request):
     course_names = [course["Course"] for course in  formatted_historic_schedules]
     courses = utils.filter_courses_by_name(courses, course_names)
 
-    """# Perform prediction
-    predictions = enrollment_predictions(historic_schedules, courses)
-    """
-
-    #try:
     historic_schedules = pd.DataFrame(historic_schedules)
     courses_df = pd.DataFrame(courses)
     predictions = enrollment_predictions(historic_schedules, courses_df)
-    # Reformate predictions
+    
     predictions = utils.reformat_predictions(courses, predictions)
-
-    """
-    except Exception as e:
-        return HttpResponse(f"Error calculating course predictions {e}", status=400)
-    """
     
     try:
         return JsonResponse(predictions, status=200, safe=False) 
